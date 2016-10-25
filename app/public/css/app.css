@@ -1,0 +1,293 @@
+/*
+Sigo un criterio que es escalar según la extructura del documento, y de más general a mas expecifico.
+Por ejemplo: 
+	Primero usamos: *; Que comprende la regla más general, ya que afecta a todos.
+	Segundo usamos: html, body; Que engloba a las reglas comunes para html y body;
+	Tercero usamos: header; 'header' cuelga de 'body', por lo que va debajo 'body';
+	Cuarto usamos: header .myclass; 'header.myclass' al ser mas especifico lo ponemos por debajo de 'header'.
+	... 
+*/
+
+/* FONTS
+font-family: 'Syncopate', sans-serif;
+font-family: 'Roboto', sans-serif;
+*/
+
+/*TAGS*/
+*{
+	
+	padding: 0px;
+	margin: 0px;
+}
+
+html, body{
+	height: 100%;
+	width: 100%;
+}
+
+html{
+	overflow-y: hidden;
+	overflow-x: hidden;
+}
+
+/*body*/
+body{}
+
+body #wrapper{
+	height: 100%;
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	border-left: 5px solid #152C70;
+	border-right: 5px solid #152C70;
+}
+
+/*header*/
+header{
+	height: 80px;
+	/*width: 100%;*/
+	color: #ffffff;
+	background: #152C70;
+
+	z-index: 3;
+}
+header nav{
+	height: 100%;
+	width: 100%;
+}
+header nav h1{
+	font-size: 1em;
+}
+header nav img{
+	height: 25px;
+	margin: 10px auto 0 auto;
+}
+
+/*header nav.nav-control{
+	height: 40px;
+	background: #152C70;
+	margin-top: 7.5px;
+	z-index: 2; 	
+}
+header nav.nav-control .btn{
+	margin: 2.5px 0 0 0;
+}
+header nav.nav-control .btn:hover{
+    -webkit-animation:spin 4s linear infinite;
+    -moz-animation:spin 4s linear infinite;
+    -o-animation:spin 4s linear infinite;
+    animation:spin 4s linear infinite;	
+}
+
+header nav.nav-menu{
+	height: 40px;
+	background: #000758;
+	border-bottom: 2px solid #C7CCDF;
+	box-shadow:  0px 2px 2px 2px #C7CCDF;	
+	z-index: 1;
+}
+header nav .menu-item{
+	display: flex;
+}
+
+header #menu{
+	height: 100%;
+	list-style: none;
+}
+
+header #menu .selected{
+    background: #7FC857;
+}
+
+header #menu .menu-item a{
+	color: #ffffff;
+	font-weight:bold;
+	font-size: small;
+}
+
+header #menu .menu-item a:active{
+	color: #439A34;
+}
+
+header #menu .menu-item a::before{
+	content: "";
+	margin: 41px 0 5px 0;
+	width: 100px;
+    height: 3px;
+    position: absolute;
+    top: 25px;
+    background: #ffffff;
+    background: #7FC857;
+	-moz-transform-origin: 0 50%;
+	-webkit-transform-origin: 0 50%;
+	transform-origin: 0 50%;
+
+	-moz-transform:scale(0, 1);
+	-webkit-transform:scale(0, 1);
+	transform: scale(0, 1);
+	transition: 250ms;
+}
+
+header #menu .menu-item a:hover::before{
+	-moz-transform:scale(0.25,1);
+	-webkit-transform:scale(0.25,1);
+	-o-transform:scale(0.25,1);
+	transform: scale(0.25,1);
+}
+
+header #menu .menu-item a:active::before{
+	content: "";
+	margin: 41px 0 5px 0;
+	width: 100px;
+    height: 3px;
+    position: absolute;
+    top: 25px;
+	background: #439A34;
+}*/
+
+/*main*/
+main{
+	/*padding: 1em;*/
+	height: calc(100% - 1.5em);
+	width: 100%;
+	background: #C7CCDF;
+
+	z-index: 0;
+}
+main *{
+	height: 100%;
+}
+/*main > div > div{
+	height: 100%;
+}
+main > div > div div{
+	height: 100%;
+}*/
+
+
+/*footer*/
+footer{
+	position: fixed;
+	bottom: 0;
+	
+	height: 1.5em;
+	width: 100%;
+
+	/*padding: 5px 0 0 0;*/
+
+	/*border-top: 2px solid gray;*/
+	/*box-shadow: -2px 0px 2px 2px #152C70;*/
+
+	color: #ffffff;
+	background: #152C70;
+	
+	font-size: smaller;
+	font-family: 'Roboto';
+
+	z-index: 1;
+}
+footer div{
+	height: 100%;
+}
+/*footer .middle h4{
+	font-weight: lighter;
+	font-style: italic;
+}*/
+
+/*CLASS */
+.left{
+	width: 15%;
+}
+
+.middle{
+	width: 100%;
+}
+
+.right{
+	width: 15%;
+}
+
+.flexi{
+	display: flex;
+}
+
+.column{
+	flex-direction: column;
+}
+.row{
+	flex-direction: row;
+}
+.row-item{
+	display: inline-block;
+}
+
+.center{
+	margin: auto;
+	text-align: center;
+	vertical-align: middle;
+}
+
+.btn{
+	background: none;
+	text-decoration-style: none;
+	margin: auto 5px;
+}
+.btn-circle{
+	border-radius: 50%;
+}
+.btn-error:hover{
+	background: #ff0000;
+}
+.btn-sucess:hover{
+	background: #7FC857;
+}
+
+
+
+.clock{
+	font-family: "courier new";
+}
+.clock .date{
+	margin: 0 5px 0 0;
+}
+.clock .time{
+	margin: 0 0 0 5px;
+}
+
+
+/*EFECTO FLIP*/
+.slide {
+    position: absolute;
+    margin: 1.5em;
+    width: calc(100% - 3em);
+    height: calc(100% - 80px - 3.5em);
+}
+.slide.ng-enter,
+.slide.ng-leave {
+    -webkit-transition: all 1s ease;
+    transition: all 1s ease;
+}
+.slide.ng-enter {
+    left: 100%;
+}
+.slide.ng-enter-active {
+    left: 1.5em;
+}
+.slide.ng-leave {
+    left: 1.5em;
+}
+.slide.ng-leave-active {
+    left: -100%;
+}
+
+/*ID*/
+#navLogo{
+	fill:white;
+}
+
+
+/*Animaciones*/
+@-o-keyframes giroImg {100% { -o-transform: rotate(360degs); } }
+@-moz-keyframes giroImg { 100% { -moz-transform: rotate(360deg); } }
+@-webkit-keyframes giroImg { 100% { -webkit-transform: rotate(360deg); } }
+@keyframes giroImg { 100% { -webkit-transform: rotate(360deg); transform:rotate(360deg); } }

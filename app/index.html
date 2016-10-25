@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head ng-app="splashFrame">
+    <!-- loading animation :: Used as a splash screen-->
+    <!-- http://www.leemunroe.com/css3-animated-loading-bar/ -->
+    <meta charset="utf-8">
+    <title>Demo Otis v2</title>
+    <link rel="stylesheet" type="text/css" href="./public/libs/lumx/dist/lumx.css">
+    <link rel="stylesheet" type="text/css" href="./public/css/app.css">
+    <link rel="stylesheet" type="text/css" href="./public/css/splash.css">
+
+    <script src="./public/libs/jquery/dist/jquery.js"></script>
+    <script src="./public/libs/velocity/velocity.js"></script>
+    <script src="./public/libs/moment/min/moment-with-locales.js"></script>
+    <script src="./public/libs/moment/moment.js"></script>
+    <script src="./public/libs/angular/angular.js"></script>
+    <script src="./public/libs/lumx/dist/lumx.js"></script>
+</head>
+<body onload="init()" ng-controller="mainController">
+    <div id="wrapper">
+        <header style="height: 50px" flex-container="row" flex-column="16">
+            <nav flex-container="row" flex-column="16">
+                <div flex-item="3"></div>
+                <div flex-item="10" class="center"></div>
+                <div flex-item="3"></div>
+            </nav>
+        </header>
+        <main flex-container="row" flex-column="16">
+            <div  flex-container="column">
+                <div flex-container="row" flex-column="16">
+                    <div flex-item="3"></div>
+                    <div flex-item="10">
+                        <!--Carta-->
+                        <div>
+                            <div id="crossfade" class="card__img card__img--top">
+                                <img class="img img-top img-big" alt="ILogotipo" src="public/images/otislogo.svg"/>
+                                <img class="img img-mid img-big" alt="ILogotipo" src="public/images/otislogo-ligthgray.svg"/>
+                            </div>
+                            <div class="p+">
+                                <div class="paragraph fs-body-1 center">
+                                    <h1>Loading <span class="dots">.</span></h1>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div flex-item="3"></div>
+                </div>
+            </div>
+        </main>
+        <footer flex-container="row" flex-column="16">
+            <div flex-container="row" flex-column="16">
+                
+            </div>
+        </footer>   
+    </div>
+
+    <script>
+        angular.module('splashFrame',['lumx']);
+        angular.module('splashFrame').controller('mainController', ['$scope', function($scope){}]);
+
+
+        function init() {
+            var load_interval;
+            require('./app.js');
+            
+            load_interval = setInterval(function () {
+                let element = document.getElementsByClassName('dots')[0];
+                if(element.innerHTML.length < 3){
+                    element.innerHTML += ".";
+                }else{
+                    element.innerHTML = "";
+                }
+            },500);
+
+            setTimeout(function () {
+                clearInterval(load_interval);
+                window.location.assign('http://localhost:3000');
+            }, 2999);
+        }
+
+    </script>
+</body>
+</html>

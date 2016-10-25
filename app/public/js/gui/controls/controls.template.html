@@ -1,0 +1,32 @@
+<ul flex-container="row" flex-column="12" class="horizontal">
+	<li class="p+" flex-item="4">
+		<lx-button 
+			lx-type="fab" 
+			lx-size="s" 
+			lx-color="white"  
+			lx-tooltip="Minimize" 
+			lx-tooltip-position="bottom"
+			ng-click="$ctrl.minimizeWindow()"
+			class="btn-control"><i class="mdi mdi-window-minimize"></i></lx-button>
+	</li>
+	<li class="p+" flex-item="4">
+		<lx-button 
+			lx-type="fab" 
+			lx-size="s" 
+			lx-color="white" 
+			lx-tooltip="Resizable" 
+			lx-tooltip-position="bottom"
+			ng-click="$ctrl.toggleMaximizeWindow()"
+			class="btn-control"><i class="mdi mdi-window-maximize"></i></lx-button>
+	</li>
+	<li class="p+" flex-item="4">
+		<lx-button 
+			lx-type="fab" 
+			lx-size="s" 
+			lx-color="red" 
+			lx-tooltip="Close" 
+			lx-tooltip-position="bottom"
+			ng-click="$ctrl.closeWindow()"
+			class="btn-control"><i class="mdi mdi-close"></i></lx-button>
+	</li>	
+</ul>

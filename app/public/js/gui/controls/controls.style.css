@@ -1,0 +1,15 @@
+/*Animaciones*/
+@-o-keyframes giroImg {100% { -o-transform: rotate(360degs); } }
+@-moz-keyframes giroImg { 100% { -moz-transform: rotate(360deg); } }
+@-webkit-keyframes giroImg { 100% { -webkit-transform: rotate(360deg); } }
+@keyframes giroImg { 100% { -webkit-transform: rotate(360deg); transform:rotate(360deg); } }
+
+controls ul.horizontal{
+	list-style: none;
+}
+controls ul .btn-control:hover{
+	-webkit-animation:giroImg 4s linear infinite;
+    -moz-animation:giroImg 4s linear infinite;
+    -o-animation:giroImg 4s linear infinite;
+    animation:giroImg 4s linear infinite;	
+}

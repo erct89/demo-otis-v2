@@ -1,0 +1,22 @@
+<div flex-container="row" flex-column="16">
+	<div flex-item="16" flex-container="column">
+		<div flex-container="row" flex-column="16">
+			<div flex-item="4">
+				<h4>Desarrollado por {{main.author}}.</h4>
+			</div>
+			<div flex-item="3">
+				<p>Ultima modificación <span ng-bind="main.lastModification | date:'dd/MM/yyyy'"></span></p>
+			</div>
+			<div flex-item="3">
+				<p>Version <span ng-bind="main.version | number"></span></p>
+			</div>
+			
+			<div id="footerClock" flex-item="3" class="clock center">
+				<ds-widget-clock show-digital digital-format="'HH:mm:ss'"></ds-widget-clock>
+			</div>
+			<div id="footerClock" flex-item="3" class="clock center">
+				<ds-widget-clock show-digital digital-format="'dd/MM/yyyy'"></ds-widget-clock>
+			</div>
+		</div>
+	</div>
+</div>

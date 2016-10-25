@@ -1,0 +1,7 @@
+Demo otis v2
+================================================================================================
+En esta demo podemos ver todos los progresos que he realizado en el proyecto, 
+los cuales estan divididos en Video Call, Mirroring, Video Recorder, Audio Recorder.
+Cada una de estas tabs muestra una funcionalidad transversal para el proyecto, ya sea
+el guardar un flujo de stream procedente de Janus, o la creacion y enviao de un fichero de audio
+hacia Janus.

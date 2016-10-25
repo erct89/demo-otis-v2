@@ -1,0 +1,1 @@
+angular.module('gui.controls', ['core.window','lumx']);

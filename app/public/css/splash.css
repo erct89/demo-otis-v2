@@ -1,0 +1,63 @@
+html{
+    color: white;
+    background: #152C70;
+    border-radius: 50px;
+}
+
+main {
+    border-radius: 50px 50px 50px 50px;
+    height: calc(100% - 100px);
+    width: 90%;
+    margin: 0 auto;
+}
+main * {
+    width: 100%;
+    height: 100%;
+}
+main > div{
+    height: 100%;
+}
+
+main .card__img.card__img--top{
+    border-radius: 10px 10px 10px;
+    height: 90%;
+}
+
+footer{
+    height: 50px;
+    padding: 5px 0 0 0;
+}
+
+div#crossfade img{
+    position: absolute;
+}
+
+@keyframes crossFade1{
+    0% {opacity:1;}
+    25% {opacity:0;}
+    50% {opacity:0;}
+    75% {opacity:0;}
+    100% {opacity:1;}
+}
+@keyframes crossFade2{
+    0% {opacity:0;}
+    25% {opacity:0;}
+    50% {opacity:1;}
+    75% {opacity:0;}
+    100% {opacity:0;}
+}
+
+#crossfade img.img.img-top {
+    animation-name: crossFade1;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+    animation-duration: 1500ms;
+    animation-direction: alternate;
+}
+#crossfade img.img.img-mid {
+    animation-name: crossFade2;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+    animation-duration: 1500ms;
+    animation-direction: alternate;
+}
