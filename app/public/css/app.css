@@ -154,9 +154,12 @@ main{
 
 	z-index: 0;
 }
-main *{
-	height: 100%;
+
+
+main * {
+	/*height: 100%;*/
 }
+
 /*main > div > div{
 	height: 100%;
 }
@@ -193,6 +196,10 @@ footer div{
 	font-weight: lighter;
 	font-style: italic;
 }*/
+
+ul{
+	list-style: none;
+}
 
 /*CLASS */
 .left{
@@ -243,7 +250,6 @@ footer div{
 }
 
 
-
 .clock{
 	font-family: "courier new";
 }
@@ -254,26 +260,30 @@ footer div{
 	margin: 0 0 0 5px;
 }
 
-
-/*EFECTO FLIP*/
+/*EFECTO SLICE*/
 .slide {
     position: absolute;
     margin: 1.5em;
     width: calc(100% - 3em);
     height: calc(100% - 80px - 3.5em);
+    transition: transform 1s;
 }
 .slide.ng-enter,
 .slide.ng-leave {
-    -webkit-transition: all 1s ease;
-    transition: all 1s ease;
+	-webkit-transition: width 2s, height 2s;
+    transition: width 2s, height 2s;
+    -webkit-transition: left 2s ease;
+    transition: left 2s ease;
 }
 .slide.ng-enter {
-    left: 100%;
+	transform: skewX(-10deg);
+    left: calc(100% - 1.5em);
 }
 .slide.ng-enter-active {
-    left: 1.5em;
+    left: 5px;
 }
 .slide.ng-leave {
+	transform: skewX(-10deg);
     left: 1.5em;
 }
 .slide.ng-leave-active {

@@ -13,13 +13,9 @@ angular.module('core').factory('App', ['APPSERVER','$http','$rootScope',function
 	return {
 		loadConfig: function(){
 			$http.get(url).success(function(data){
-				console.log("DESDE CORE.SERVICE");
-				console.log(data);
 				self.app = data;
 				$rootScope.$broadcast('LoadedConfigApp');
 			}).error(function(error){
-				console.log("DESDE CORE.SERVICE");
-				console.log(error);
 				$rootScope.$broadcast('ErrorLoadConfigApp');
 			});	
 		},

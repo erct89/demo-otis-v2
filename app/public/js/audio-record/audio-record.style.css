@@ -1,0 +1,79 @@
+audio-record #audiorecord-wrapper {
+	height: 100%;
+	background: #ffffff;
+}
+
+audio-record #audiorecord-wrapper .header{
+	background: #2098d1;
+	color: #ffffff;
+	padding-bottom: 1.5em; 
+}
+
+audio-record #audiorecord-wrapper .main{
+	height: calc(100% - 24px - 3.5em);
+}
+
+audio-record #audiorecord-wrapper .main #list-rec.card{
+	height: calc(100% - 48px - 6em);
+}
+/*audio-record #audiorecord-wrapper .main li{
+	position: relative;
+	padding-top: 0.5em;
+}
+/*audio-record #audiorecord-wrapper .main li::before{
+	content: "";
+	position: absolute;
+	margin-left: 2.5%;
+	margin-top: -0.5em; 
+	height: 1px;
+	width: 95%;
+	background: #d7d7d7;
+}
+audio-record #audiorecord-wrapper .main li:first-child:before{
+	content: "";
+	height: 0;
+}*/
+audio-record audio{
+	width: 100%;
+}
+
+audio-record #audiorecord-wrapper .main .card{
+	position: relative;
+	margin: 4px;
+}
+
+audio-record #audiorecord-wrapper .main .card-header{
+	background: #d7d7d7;
+	color: #ffffff;
+}
+audio-record #audiorecord-wrapper .card-header h2{
+	text-align: center;
+}
+audio-record #audiorecord-wrapper .card-header p{
+	font-size: small;
+	font-style: italic;
+}
+
+
+audio-record #audiorecord-wrapper .unsupport{
+	text-decoration: line-through;
+	color: #FF5555;
+}
+
+audio-record .btn-control{
+	position: absolute !important;
+	margin-left: -1em;
+}
+
+.key{
+	font-weight: bold;
+}
+.value{
+	font-weight: normal;
+}
+
+/*Ocultar contenido*/
+audio-record .unsupport{
+	filter: grayscale(100%) blur(1px);
+	pointer-events: none;
+}

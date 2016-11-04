@@ -11,6 +11,9 @@
     <link rel="stylesheet" type="text/css" href="css/app.css">
     <link rel="stylesheet" type="text/css" href="js/gui/controls/controls.style.css">
     <link rel="stylesheet" type="text/css" href="js/gui/menu/menu.style.css">
+    <link rel="stylesheet" type="text/css" href="js/gui/panel/panel.style.css">
+    <link rel="stylesheet" type="text/css" href="js/features/features.style.css">
+    <link rel="stylesheet" type="text/css" href="js/audio-record/audio-record.style.css">
 </head>
 
 <body ng-controller="mainController as main">
@@ -25,6 +28,7 @@
     <script src="libs/velocity/velocity.js"></script>
     <script src="libs/moment/min/moment-with-locales.js"></script>
     <script src="libs/moment/moment.js"></script>
+    <script src="libs/adapterjs/publish/adapter.debug.js"></script>
     <script src="libs/angular/angular.js"></script>
     <script src="libs/angular-route/angular-route.js"></script>
     <script src="libs/angular-animate/angular-animate.js"></script>
@@ -34,6 +38,8 @@
     <!--Libs Scripts-->
     <script src="libs/angular-ui-clock/dist/angular-clock.min.js"></script>
     
+    <script src="js/features/features.module.js"></script>
+    <script src="js/features/features.component.js"></script>
     <script src="js/audio-record/audio-record.module.js"></script>
     <script src="js/audio-record/audio-record.component.js"></script>
     <script src="js/mirroring/mirroring.module.js"></script>
@@ -48,7 +54,20 @@
     <script src="js/gui/menu/menu-item/menuItem.component.js"></script>
     <script src="js/gui/controls/controls.module.js"></script>
     <script src="js/gui/controls/controls.component.js"></script>
+    <script src="js/gui/panel/panel.module.js"></script>
+    <script src="js/gui/panel/panel.component.js"></script>
     <script src="js/gui/gui.module.js"></script>
+    
+    <script src="js/webrtc/webrtc.module.js"></script>
+    <script src="js/webrtc/webrtc.config.js"></script>
+    <script src="js/webrtc/webrtc.service.js"></script>
+    <script src="js/webrtc/filters/dataurl.filter.js"></script>
+    <script src="js/webrtc/plataform/plataform.service.js"></script>
+    <script src="js/webrtc/adapter/adapter.service.js"></script>
+    <script src="js/webrtc/dependencies/dependencies.constant.js"></script>
+    <script src="js/webrtc/dependencies/dependencies.service.js"></script>
+    <script src="js/webrtc/devices/devices.service.js"></script>
+
     <script src="js/core/nw/nw.module.js"></script>
     <script src="js/core/nw/nw.service.js"></script>
     <script src="js/core/window/window.module.js"></script>

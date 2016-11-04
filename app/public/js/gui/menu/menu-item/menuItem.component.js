@@ -10,6 +10,7 @@ angular.module('gui.menu').component('menuItem',{
 	bindings:{
 		meItem:'<',
 		meIndex:'@',
+		meCurrentIndex:'@',
 		onSelect:'&'
 	}
 });

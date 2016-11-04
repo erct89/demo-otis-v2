@@ -1,0 +1,12 @@
+panel{
+}
+
+panel .gui-panel{
+	height: 100%;
+	overflow-y: auto;
+}
+
+panel * {
+	height: auto;
+	overflow-y: auto;
+}

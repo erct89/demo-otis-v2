@@ -1,9 +1,78 @@
-<div class="card">
-	<div class="header">
+<div id="audiorecord-wrapper">
+	<div class="header p" ng-class="{'bgc-amber-500': ($ctrl.state === 'unsupport')}">
 		<h1>Audio Record</h1>
-		<p>Realize grabaciones de audio desde su dispositivo de forma facíl y sencillas.</p>
+		<p ng-show="!$ctrl.unSupport">Realize grabaciones de audio desde su dispositivo de forma facíl y sencillas.</p>
+		<p ng-show="$ctrl.unSupport">Capacidad no soportada.</p>
 	</div>
-	<div class="main">
-
+	<div class="main p" ng-class="{unsupport: ($ctrl.state === 'unsupport')}" flex-column>
+		<div class="card p">
+			<h4>Destino en Servidor</h4>
+			<input type="text" name="path" ng-model="$ctrl.path">
+		</div>
+		<div class="card p">
+			<div flex-container="row" flex-column="16">
+				<div flex-item="14">
+					<audio controls="true" id="audioOutput" autoplay="" ng-src="{{$ctrl.input}}"></audio>
+				</div>
+				<div flex-item="{{($ctrl.state === 'pause')? 1 : 2;}}" style="text-align: center;">
+					<lx-button ng-show="$ctrl.state === 'stopped'"
+						lx-type="fab" 
+						lx-size="s" 
+						lx-color="red"  
+						lx-tooltip="Grabar" 
+						lx-tooltip-position="bottom"
+						ng-click="$ctrl.rec()"
+						class="btn-control">
+						<i class="mdi mdi-record"></i>
+					</lx-button>
+					<lx-button ng-show="$ctrl.state === 'recording'"
+						lx-type="fab" 
+						lx-size="s" 
+						lx-color="blue" 
+						lx-tooltip="Parar" 
+						lx-tooltip-position="bottom"
+						ng-click="$ctrl.pause()"
+						class="btn-control">
+						<i class="mdi mdi-pause"></i>
+					</lx-button>
+					<lx-button ng-show="$ctrl.state === 'pause'"
+						lx-type="fab" 
+						lx-size="s" 
+						lx-color="blue" 
+						lx-tooltip="Cancelar" 
+						lx-tooltip-position="bottom"
+						ng-click="$ctrl.cancel()"
+						class="btn-control">
+						<i class="mdi mdi-close"></i>
+					</lx-button>
+				</div>
+				<div flex-item="1" ng-show="$ctrl.state === 'pause'" style="text-align: center;">
+					<lx-button 
+						lx-type="fab" 
+						lx-size="s" 
+						lx-color="green" 
+						lx-tooltip="Guardar" 
+						lx-tooltip-position="bottom"
+						ng-click="$ctrl.save()"
+						class="btn-control">
+						<i class="mdi mdi-content-save"></i>
+					</lx-button>
+				</div>
+			</div>
+		</div>
+		<div class="card" id="list-rec">
+			<div class="card-header p">
+				<h3>Grabaciones</h3>
+				<p>Actualmente existen <span ng-bind="$ctrl.recs.length"></span> grabaciones.</p>
+			</div>
+			<div class="card-main">
+				<div ng-repeat="audio in $ctrl.recs">
+					<label>Nombre: 
+						<a ng-href="{{audio.dataUri}}" download="{{audio.name}}" name="{{audio.name}}"><span ng-bind="audio.name"></span>
+						</a>
+					</label>
+				</div>
+			</div>
+		</div>
 	<div>
 </div>

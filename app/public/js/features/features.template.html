@@ -1,0 +1,137 @@
+<div id="features-wrapper">
+	<div class="header p">
+		<h1>Caracteristicas soportadas.</h1>
+		<p>En esta sección mostramos las caracteristicas que son soportadas por su dispositivo.</p>
+	</div>
+	<div class="main p" flex-container="row" flex-column="12">
+		<div flex-item="6" flex-container="column">
+			<div class="card" ng-show="$ctrl.os && $ctrl.os.name ">
+				<div class="card-header p">
+					<h2>Sistema Operativo</h2>
+					<p>Información general sobre el sistema operativo</p>
+				</div>
+				<div class="card-main p">
+					<ul>
+						<li ng-show="$ctrl.os.name">
+							<p>
+								<span class="key">Nombre:</span>
+								<span class="value" ng-bind="$ctrl.os.name"></span>.
+							</p>
+						</li>
+						<li ng-show="$ctrl.os.version">
+							<p>
+								<span class="key">Version:</span>
+								<span class="value" ng-bind="$ctrl.os.version"></span>.
+							</p>
+						</li>
+					</ul>
+				</div>
+			</div>
+			<div class="card" ng-show="$ctrl.browser">
+				<div class="card-header p">
+					<h2>Navegador</h2>
+					<p>Información general sobre el navegador utilizado.</p>
+				</div>
+				<div class="card-main p">
+					<ul>
+						<li ng-show="$ctrl.browser.name">
+							<p>
+								<span class="key">Nombre: </span><span class="value" ng-bind="$ctrl.browser.name"></span>
+							</p>
+						</li>
+						<li ng-show="$ctrl.browser.version">
+							<p>
+								<span class="key">Version: </span><span class="value" ng-bind="$ctrl.browser.version"></span>
+							</p>
+						</li>
+						<li>
+							<p>
+								<i  class="mdi" ng-class="{'mdi-close':!($ctrl.browser.isMobile), 'mdi-check':($ctrl.browser.isMobile)}"></i>
+								<span ng-class="{unsupport:(!$ctrl.browser.isMobile)}">Version Mobil</span>
+							</p>
+						</li>
+						<li>
+							<p>
+								<i  class="mdi" ng-class="{'mdi-close':(!$ctrl.browser.enabledCookies), 'mdi-check':($ctrl.browser.enabledCookies)}"></i>
+								<span ng-class="{unsupport:(!$ctrl.browser.enabledCookies)}">Cookies Activas</span>
+							</p>
+						</li>
+					</ul>
+				</div>
+			</div>
+			<div class="card" ng-show="$ctrl.devices">
+				<div class="card-header p">
+					<h2>Dispositivos Conectados</h2>
+					<p>Lista de dispositivos multimédia disponibles.</p>
+				</div>
+				<div class="card-main p">
+					<ul>
+						<li ng-repeat="device in $ctrl.devices">
+							<p>
+								<span class="key">Id: </span>
+								<span class="value" ng-bind="device.deviceId"></span>
+							</p>
+							<p>
+								<span class="key">Tipo: </span>
+								<span class="value" ng-bind="device.kind"></span>
+							<p>
+							</p>
+								<span class="key">Nombre: </span> 
+								<span class="value" ng-bind="device.label"></span>
+							</p>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+		<div flex-item="6" flex-container="column">
+			<div class="card" ng-show="$ctrl.languages">
+				<div class="card-header p">
+					<h2>Lenguajes Soportados</h2>
+				</div>
+				<div class="card-main p">
+					<ul>
+						<li ng-repeat="language in $ctrl.languages">
+							<span class="value" ng-bind="language"></span>
+						</li>
+					</ul>
+				</div>
+			</div>
+			<div class="card" ng-show="$ctrl.screen">
+				<div class="card-header p">
+					<h2>Tamaño de la ventana</h2>
+				</div>
+				<div class="card-main p">
+					<ul>
+						<li>
+							<p>
+								<span class="key">Ancho: </span>
+								<span class="value" ng-bind="$ctrl.screen.width"></span>
+							</p>
+						</li>
+						<li>
+							<p>
+								<span class="key">Alto: </span>
+								<span ng-bind="$ctrl.screen.height"></span>
+							</p>
+						</li>
+					</ul>
+				</div>
+			</div>
+			<div class="card" ng-show="$ctrl.dependencies">
+				<div class="card-header p">
+					<h2>Lista de dependencias</h2>
+					<p>Lista de APIs que son necesarios para que todo funcione bien.</p>
+				</div>
+				<div class="card-main p">
+					<ul>
+						<li ng-repeat="lib in $ctrl.dependencies">
+							<i  class="mdi" ng-class="{'mdi-close':(lib.support === false), 'mdi-check':(lib.support === true)}"></i>
+							<span ng-bind="lib.name" ng-class="{unsupport:(!lib.support)}"></span>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

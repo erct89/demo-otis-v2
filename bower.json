@@ -5,6 +5,7 @@
     "lumx": "1.2.7",
     "angular": "*",
     "angular-ui-clock": "^0.5.1",
-    "hover": "Hover#^2.0.2"
+    "hover": "Hover#^2.0.2",
+    "adapterjs": "^0.14.0"
   }
 }

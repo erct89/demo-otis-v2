@@ -1,18 +1,19 @@
 //Configuración de los servicios y de la aplicacions.
 angular.module('otisDemo')
 	.config(['$routeProvider',function($routeProvider) {
-		$routeProvider.when('/videocall',{
-			template: '<div><video-call></video-call></div>'
+		$routeProvider.when('/',{
+			template:'<panel><features><h1>Hola<h1></features></panel>'
+		}).when('/videocall',{
+			template: '<video-call></video-call>'
 		}).when('/mirroring',{
-			template: '<div><mirroring></mirroring></div>'
+			template: '<mirroring></mirroring>'
 		}).when('/videorecord',{
-			template: '<div><video-record></video-record></div>'
+			template: '<video-record></video-record>'
 		}).when('/audiorecord',{
-			template: '<div><audio-record></audio-record></div>'
+			template: '<audio-record></audio-record>'
 		}).otherwise({
-			redirectTo: '/videorecord'
+			redirectTo: '/'
 		});
-
 	}]);
 
 

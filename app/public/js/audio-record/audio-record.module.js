@@ -1,3 +1,3 @@
 'use strict';
 
-angular.module('audioRecord',[]);
+angular.module('audioRecord',['lumx','core','webrtc']);

@@ -4,6 +4,11 @@ angular.module('gui.menu').constant('MENU', {
 	route: '/',
 	template: 'home.html', 
 	items: [{
+		id: 'features',
+		name: 'Caracteristicas',
+		url: 'features',
+		template: ''
+	},{
 		id: 'video-call',
 		name: 'Video Call',
 		url: 'videocall',

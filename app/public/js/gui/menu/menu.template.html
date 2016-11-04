@@ -3,6 +3,8 @@
 	me-item= "item"
 	me-index = "{{$index}}"
 	on-select="$ctrl.changeCurrentItem(itemId, itemIndex)"
-	ng-class="{'hvr-underline-from-center':($ctrl.menu.currentItemIndex === -1), 'hvr-underline-from-left':($index > $ctrl.menu.currentItemIndex), 'hvr-underline-from-right':($index < $ctrl.menu.currentItemIndex), 'select': ($ctrl.menu.currentItem === item.id)}"
+	ng-class="{'hvr-underline-from-center':($ctrl.menu.currentItemIndex === -1), 'hvr-underline-from-left':($index > $ctrl.menu.currentItemIndex), 
+	'hvr-underline-from-right':($index < $ctrl.menu.currentItemIndex), 
+	'select': ($ctrl.menu.currentItem === item.id)}"
 	>
 </menu-item>
