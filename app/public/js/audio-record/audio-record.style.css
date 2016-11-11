@@ -60,6 +60,11 @@ audio-record #audiorecord-wrapper .unsupport{
 	color: #FF5555;
 }
 
+audio-record #audiorecord-wrapper #list-rec .card-main{
+	overflow-y: auto;
+	height: calc(100% - 80px);
+}
+
 audio-record .btn-control{
 	position: absolute !important;
 	margin-left: -1em;

@@ -40,7 +40,7 @@ angular.module('features').component('features',{
 				return item;
 			};
 
-			var loadDevices = function(){
+			/*var loadDevices = function(){
 				var devices = $window.navigator.mediaDevices;
 
 				if(devices){
@@ -50,11 +50,12 @@ angular.module('features').component('features',{
 						self.devices = [];
 					});
 				}
-			}
+			}*/
 
 			//Propiedades publicas.
 			self.os = Plataform.getOS();
 			self.browser = Plataform.getBrowser();
+			self.mimeType = Plataform.getMineType();
 			self.languages = Plataform.getLanguages();
 			self.screen =  Plataform.getScreen();
 			self.dependencies = loadDependencies();

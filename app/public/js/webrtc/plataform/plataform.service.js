@@ -5,7 +5,15 @@ angular.module('webrtc')
 		var self = this;
 		self.window = $window;
 		self.navigator = $window.navigator;
-
+		self.mimesType = {
+			firefox: {
+				audio: {mime: 'audio/ogg',subfix: 'oga'},
+				video:{mime: 'video/webm;codecs=vp8',subfix: 'webm'}
+			},chrome:{
+				audio:{mime: 'audio/webm;codecs="opus"',subfix: 'opus'},
+				video:{mime: 'video/webm;codecs=vp9',subfix: 'webm'}
+			}
+		};
 
 		self.getBrowser = function(){
 			var nVer = self.navigator.appVersion;
@@ -160,12 +168,16 @@ angular.module('webrtc')
 	        return os;
 		};
 
+		self.getMineType = function() {
+			var os = self.getBrowser().name.toLowerCase(); 
+			return self.mimesType[os];
+		};
 
 		return {
 			getOS: function(){ return self.getOS(); },
 			getBrowser: function() { return self.getBrowser(); },
 			getLanguages: function (){ return self.navigator.languages; },
 			getScreen: function(){ return self.getScreen(); },
-			getMineType: function(){ return self.getMineType();}
+			getMineType: function(){ return self.getMineType();},
 		};
 	}]);

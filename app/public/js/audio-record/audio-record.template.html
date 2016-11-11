@@ -66,11 +66,55 @@
 				<p>Actualmente existen <span ng-bind="$ctrl.recs.length"></span> grabaciones.</p>
 			</div>
 			<div class="card-main">
-				<div ng-repeat="audio in $ctrl.recs">
-					<label>Nombre: 
-						<a ng-href="{{audio.dataUri}}" download="{{audio.name}}" name="{{audio.name}}"><span ng-bind="audio.name"></span>
-						</a>
-					</label>
+				<div 
+					class="card p" 
+					ng-class="{unsupport:($ctrl.state !== 'stopped')}"
+					flex-container="row" 
+					flex-column="16" 
+					ng-repeat="audio in $ctrl.recs">
+					<div flex-item="12">
+						<h4>Nombre: <span ng-bind="audio.name"></span></h4>
+					</div>
+					<div flex-item="4" class="center">
+						<lx-button 
+						lx-type="icon"
+						lx-size="m"
+						lx-color="red"
+						lx-tooltip="Delete" 
+						lx-tooltip-position="bottom"
+						ng-click="$ctrl.delete($index)">
+						<i class="mdi mdi-delete"></i>
+						</lx-button>
+						<lx-button 
+						lx-type="icon"
+						lx-size="m"
+						lx-color="green"
+						lx-tooltip="Play" 
+						lx-tooltip-position="bottom"
+						ng-click="$ctrl.play($index)">
+						<i class="mdi mdi-play"></i>
+						</lx-button>
+						<lx-button 
+						lx-type="icon"
+						lx-size="m"
+						lx-color="green"
+						lx-tooltip="Send" 
+						lx-tooltip-position="bottom"
+						ng-click="$ctrl.send($index)">
+						<i class="mdi mdi-send"></i>
+						</lx-button>
+						<lx-button 
+						lx-type="icon"
+						lx-size="m"
+						lx-color="blue"
+						lx-tooltip="Download" 
+						lx-tooltip-position="bottom">
+						<a class="mdi mdi-download" 
+							ng-href="audio.datauri" 
+							name="{{audio.name}}" 
+							download="{{audio.name}}"></a>
+						</lx-button>
+					</div>
 				</div>
 			</div>
 		</div>

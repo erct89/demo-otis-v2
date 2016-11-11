@@ -59,26 +59,38 @@
 					</ul>
 				</div>
 			</div>
-			<div class="card" ng-show="$ctrl.devices">
+			<div class="card" ng-show="$ctrl.mimeType">
 				<div class="card-header p">
-					<h2>Dispositivos Conectados</h2>
-					<p>Lista de dispositivos multimédia disponibles.</p>
+					<h2>Tipo de archivos soportados.</h2>
+					<p>Los tipos mime utilizados en la aplicacion</p>
 				</div>
 				<div class="card-main p">
 					<ul>
-						<li ng-repeat="device in $ctrl.devices">
-							<p>
-								<span class="key">Id: </span>
-								<span class="value" ng-bind="device.deviceId"></span>
-							</p>
-							<p>
-								<span class="key">Tipo: </span>
-								<span class="value" ng-bind="device.kind"></span>
-							<p>
-							</p>
-								<span class="key">Nombre: </span> 
-								<span class="value" ng-bind="device.label"></span>
-							</p>
+						<li>
+							<div>
+								<h3>Audio</h3>
+								<p>
+									<span class="key">Mime:</span>
+									<span class="value" ng-bind="$ctrl.mimeType.audio.mime"></span>
+								</p>
+								<p>
+									<span class="key">Extension:</span>
+									<span class="value" ng-bind="$ctrl.mimeType.audio.subfix"></span>
+								</p>
+							</div>
+						</li>
+						<li>
+							<div>
+								<h3>Video</h3>
+								<p>
+									<span class="key">Mime:</span>
+									<span class="value" ng-bind="$ctrl.mimeType.video.mime"></span>
+								</p>
+								<p>
+									<span class="key">Extension:</span>
+									<span class="value" ng-bind="$ctrl.mimeType.video.subfix"></span>
+								</p>
+							</div>
 						</li>
 					</ul>
 				</div>
@@ -128,6 +140,30 @@
 						<li ng-repeat="lib in $ctrl.dependencies">
 							<i  class="mdi" ng-class="{'mdi-close':(lib.support === false), 'mdi-check':(lib.support === true)}"></i>
 							<span ng-bind="lib.name" ng-class="{unsupport:(!lib.support)}"></span>
+						</li>
+					</ul>
+				</div>
+			</div>
+			<div class="card" ng-show="$ctrl.devices">
+				<div class="card-header p">
+					<h2>Dispositivos Conectados</h2>
+					<p>Lista de dispositivos multimédia disponibles.</p>
+				</div>
+				<div class="card-main p">
+					<ul>
+						<li ng-repeat="device in $ctrl.devices">
+							<p>
+								<span class="key">Id: </span>
+								<span class="value" ng-bind="device.deviceId"></span>
+							</p>
+							<p>
+								<span class="key">Tipo: </span>
+								<span class="value" ng-bind="device.kind"></span>
+							<p>
+							</p>
+								<span class="key">Nombre: </span> 
+								<span class="value" ng-bind="device.label"></span>
+							</p>
 						</li>
 					</ul>
 				</div>

@@ -2,7 +2,6 @@
 
 angular.module('webrtc').service('Util', [function(){
 	var self = this;
-
 /*
 	getExitProperties(ref, properties)
 		- Description: Se le pasa una referencia a un objeto 'ref' y un array de strings 'properties',
@@ -186,6 +185,7 @@ angular.module('webrtc').service('Util', [function(){
 		> prefix: [<String> || '_'];
 		> subfix: [<String> || ''];
 		> [separator]: [<Object> || {top:'_',bottom:''}];  
+		< return: <String> prefix + (separator.top|'_') + seeder + (separator.bottom|'') + subfix
 	*/
 	self.generateString = function (seeder,prefix,subfix,separator){
 		var _separator = { top: "", bottom: ""};
@@ -204,5 +204,23 @@ angular.module('webrtc').service('Util', [function(){
 		}
 		
 		return prefix + _separator.top + _seeder + _separator.bottom + subfix;
-	}
+	};
+
+	/*
+	jsonConcat(json,other_json)
+		- Description: Une dos json en uno.
+		> json, other_json: <JSON> Objettos json a ser unidos.
+		< return: <JSON> json + other_json. 
+	*/
+	self.jsonConcat = function(json, other_json){
+		var result = null;
+		json = json || {};
+		result = other_json = other_json || {};
+
+		for(let property in json){
+			result[property] = json[property];
+		}
+
+		return result;
+	};
 }]);
