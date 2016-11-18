@@ -189,7 +189,8 @@ angular.module('webrtc').service('Util', [function(){
 	*/
 	self.generateString = function (seeder,prefix,subfix,separator){
 		var _separator = { top: "", bottom: ""};
-		var _seeder = (typeof seeder === "function")? seeder(): new Date().getTime().toString();
+		var _seeder = (typeof seeder === "string")? seeder: null;
+		_seeder = ( (_seeder === null) && (typeof(seeder) === "function") )? seeder(): new Date().getTime().toString();
 		_seeder = (typeof _seeder === "string")? _seeder: "";
 		prefix = (typeof prefix === "string")? prefix: "";
 		subfix = (typeof subfix === "string")? subfix: "";

@@ -12,16 +12,48 @@ angular.module('webrtc')
 			self.constraints = {audio: self.spConstraints.audio, video: self.spConstraints.video}; //Establecer las propiedades por defecto.
 			self.userMedia = Dependencies.getDependecy("window.navigator.mediaDevices.getUserMedia");
 
-			var setConstraint = function(constraints){
-				constraints = (typeof(constraints) === 'object')? constraints: null;
-				constraints.audio = constraints.audio || self.constraints.audio;
-				constraints.video = constraints.video || self.constraints.video;	
-				self.constraints = jsonConstraint;
+			/*
+				checkConstraint(<String>)
+					- Description: Comprueba si la propiedad que se le pasa como parametro, 
+					es soportada por nuestro equipo.
+					> restraints: <Object> Objeto con las restricciones.
+					< return: <Boolean> True restriccion soportada, False restriccion no soportada.
+			*/
+			var checkConstraint = function(property){
+				var result = false;
+
+				property = (typeof(property) === 'string')? property: null;
+				result = Boolean(self.spConstraints[property]);
+
+				return result;
 			};
 
-			var startDevice = function () {
+
+			/*
+				starDevice(constraints)
+					- Description: Intenta obtener un nuevo stream segun unas restricciones,
+					solo pide el mediaStream si los dispositivos pedidos en constraints son 
+					soportados por nuestro equipo, hay soporte para las APIS y no hay ya un 
+					mediaStream creado.
+			*/
+			var startDevice = function (constraints) {
+				constraints = (typeof(constraints)==='object')? constraints: {};
+				var message;
 				return new Promise(function(resolve,reject){
-					if(!self.media_stream){
+					//Si se ha pedido un stream de audio comprobar que existe soporte para audio
+					if(constraints.audio !== checkConstraint('audio')){
+						message = 'No support for audio devices';
+					}
+					//Si se ha pedio un stream de video, comprobar que hay soporte para video.
+					if(constraints.video !== checkConstraint('video')){
+						message = 'No support for video devices';	
+					}
+
+					/*
+						Comprobar si ya existe un mediaStream y si hay soporte 
+						para el dispositivo requerido.
+					*/
+					if(!self.media_stream && !message){
 						self.userMedia(self.constraints)
 							.then(function (mediaStream) {
 								self.media_stream = mediaStream;
@@ -31,7 +63,8 @@ angular.module('webrtc')
 								reject(error);
 							});
 					}else{
-						reject('Device Info: Ya exite un mediaStream.');
+						message = message || 'There is already a device in use';
+						reject(message);
 					}
 				});
 			};
@@ -66,11 +99,13 @@ angular.module('webrtc')
 			};
 
 			return {
-				setConstraint: function(constraints) { setConstraint(constraints); },
+				//setConstraint: function(constraints) { setConstraint(constraints); },
+				isVideoSupport: function() { return checkConstraint('video'); },
+				isAudioSupport: function() { return checkConstraint('audio'); },
 				getConstraint: function() { return self.constranints; },
 				getState: function () { return self.state; },
 				getMediaStream: function () {return media_stream;},
-				start: function() { return startDevice(); },
+				start: function(constraints) { return startDevice(constraints); },
 				stop: function(){ return stopDevice(); }
 			};
 		}]);

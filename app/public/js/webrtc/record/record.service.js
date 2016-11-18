@@ -1,7 +1,7 @@
 'use strict'
 
-angular.module('webrtc').factory('Record', ['Util','Dependencies', 
-	function(Util, Dependencies){
+angular.module('webrtc').factory('Record', ['Util','Dependencies','$rootScope', 
+	function(Util, Dependencies, $rootScope){
 		var self = this;
 		var MStream = Dependencies.getDependecy("window.MediaStream");
 		var MRecord = Dependencies.getDependecy("window.MediaRecorder");
@@ -22,20 +22,25 @@ angular.module('webrtc').factory('Record', ['Util','Dependencies',
 			if(isSupport() && !mediaRecord && mediaStream){
 				//Comporbar que el tipo mime es soportado.
 				if(MRecord.isTypeSupported(options.mimeType)){
-					var chunks = []; 
+					var chunks = [];
+					$rootScope.$broadcast('onCreateRecord', null);
 					mediaRecord = new MRecord(mediaStream, options);
 					
 					mediaRecord.onstart = function(event){
 						objectRecord = new Object();
+						$rootScope.$broadcast('onStartRecord',null);
 						console.log('Record state starting.');
 					};
 					mediaRecord.onpause = function(){
+						$rootScope.$broadcast('onPauseRecord', null);
 						console.log('Record state pause.');
 					};
 					mediaRecord.onresume = function(){
+						$rootScope.$broadcast('onResumeRecord', null);
 						console.log('Record state resume.');
 					};
 					mediaRecord.onwarning = function(warning){
+						$rootScope.$broadcast('onRecordWarning', warning);
 						console.log('Record state warning: ' + warning);
 					};
 					mediaRecord.onstop = function(){
@@ -49,20 +54,23 @@ angular.module('webrtc').factory('Record', ['Util','Dependencies',
 
 						objectRecord = new Object();
 						objectRecord.blob = new Blob(chunks,{type:mediaRecord.mimeType});
-						blobToBase64(new Blob(chunks,{type:mediaRecord.mimeType}))
+						objectRecord.dataUri = URL.createObjectURL(objectRecord.blob);
+						blobToB64(new Blob(chunks,{type:mediaRecord.mimeType}))
 							.then(function(blob){
 								objectRecord.blob64 = blob;
 							});
 						
-						//objectRecord.dataUri = URL.createObjectURL(objectRecord.blob);
-						
+			
 						chunks = [];
 						mediaRecord = null;
+						$rootScope.$broadcast('onRecordStop', null);
 					};
 					mediaRecord.onerror = function(error){
+						$rootScope.$broadcast('onRecordError', error);
 						console.log('Record state error: ' + error);
 					};
 					mediaRecord.ondataavailable = function(event){
+						$rootScope.$broadcast('onRecordDataavailable', {data: event.data});
 						console.log('Record state data available.');
 
 						//Quitar los trozos que no tiene datos.
@@ -108,7 +116,7 @@ angular.module('webrtc').factory('Record', ['Util','Dependencies',
 			}
 		};
 		
-		var blobToBase64 = function(blob){
+		var blobToB64 = function(blob){
 			return new Promise(function(resolve ,reject){
 				var reader = new FReader();
 				reader.onload = function(){
@@ -120,11 +128,37 @@ angular.module('webrtc').factory('Record', ['Util','Dependencies',
 			});
 		};
 
+		var b64ToBlob = function (b64Data, contentType, sliceSize) {
+			contentType = contentType || '';
+			sliceSize = sliceSize || 512;
+
+			var byteCharacters = atob(b64Data);
+			var byteArrays = [];
+
+			for (var offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+				var slice = byteCharacters.slice(offset, offset + sliceSize);
+
+				var byteNumbers = new Array(slice.length);
+				for (var i = 0; i < slice.length; i++) {
+		  			byteNumbers[i] = slice.charCodeAt(i);
+				}
+
+				var byteArray = new Uint8Array(byteNumbers);
+
+				byteArrays.push(byteArray);
+			}
+
+			var blob = new Blob(byteArrays, {type: contentType});
+			return blob;
+		};
+
 		return {
 			isSupport: function(){ return isSupport(); }, //
 			createRecord: function(mediaStream, options){ createRecord(mediaStream, options); },
-			getBlob: function(){ return objectRecord.blob; },
-			getDataUri: function(){ return objectRecord.dataUri; },
+			b64ToBlob: function(b64Data, contentType, sliceSize) { return b64ToBlob(b64Data, contentType, sliceSize); },
+			blobToB64: function(blob) {return blobToB64(blob); },
+			//getBlob: function(){ return objectRecord.blob; },
+			//getDataUri: function(){ return objectRecord.dataUri; },
 			getRecord: function(){ return objectRecord; }, 
 			start: function(timeslice){ start(timeslice); },
 			stop: function(){ stop(); }

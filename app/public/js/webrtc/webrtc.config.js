@@ -1,11 +1,11 @@
 angular.module('webrtc')
 	.config(['$compileProvider',function($compileProvider) {
-		$compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|file|javascript|blob):/);
+		$compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|http|local|ftp|mailto|file|javascript|blob|chrome-extension):/);
 	}]);
 
 angular.module('webrtc')
 	.run(['Util', 'Devices', function(Util, Devices){
-		//Obteniedo los diferentes dispositivos.
+		//Obteniedo los diferentes dispositivos y de paso las restricciones.
 		Devices.loadDevices().then(function(devicesInfo){
 			var all_devices = devicesInfo;
 			//No todos los dispositivos que hay en devicesInfo son realmente
@@ -20,7 +20,7 @@ angular.module('webrtc')
 			//Aprovechando que estan cargados los dispositivos, obtenemos tambien las diferenes
 			//restriciones, que son posibles.
 			Devices.constraints = Devices.loadConstraints(devicesInfo);
-		}).catch(function(err){
-			console.log(err);
+		}).catch(function(error){
+			console.log(error);
 		});
 	}]);

@@ -1,0 +1,83 @@
+media-record #mr-wrapper {
+	height: 100%;
+	background: #ffffff;
+}
+
+media-record #mr-wrapper .header{
+	background: #2098d1;
+	color: #ffffff;
+	padding-bottom: 1.5em; 
+}
+
+media-record #mr-wrapper .main{
+	height: calc(100% - 24px - 3.5em);
+}
+
+media-record #mr-wrapper.video .main > div{
+	height: calc(100% - 0.5em);
+}
+
+media-record #mr-wrapper .main #controls{
+	height: 3.5em;
+}
+
+media-record #mr-wrapper .main #list-rec.card{
+	height: calc(100% - 24px - 3em);
+}
+
+media-record audio{
+	width: 100%;
+}
+
+media-record video{
+	background: url('../../images/bgvideo.png');
+	height: 99%;
+	width: 99%;
+}
+
+media-record #mr-wrapper .main .card{
+	position: relative;
+	margin: 4px;
+}
+
+media-record #mr-wrapper .main .card-header{
+	background: #d7d7d7;
+	color: #ffffff;
+}
+
+media-record #mr-wrapper .card-header h2{
+	text-align: center;
+}
+
+media-record #mr-wrapper .card-header p{
+	font-size: small;
+	font-style: italic;
+}
+
+media-record #mr-wrapper span.unsupport{
+	text-decoration: line-through;
+	color: #FF5555;
+}
+
+media-record #mr-wrapper #list-rec .card-main{
+	overflow-y: auto;
+	height: calc(100% - 80px);
+}
+
+media-record .btn-control{
+	position: absolute !important;
+	margin-left: -1em;
+}
+
+.key{
+	font-weight: bold;
+}
+.value{
+	font-weight: normal;
+}
+
+/*Ocultar contenido*/
+media-record .unsupport{
+	filter: grayscale(100%) blur(1px);
+	pointer-events: none;
+}

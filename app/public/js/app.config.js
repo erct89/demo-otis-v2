@@ -7,10 +7,10 @@ angular.module('otisDemo')
 			template: '<video-call></video-call>'
 		}).when('/mirroring',{
 			template: '<mirroring></mirroring>'
-		}).when('/videorecord',{
-			template: '<video-record></video-record>'
-		}).when('/audiorecord',{
-			template: '<audio-record></audio-record>'
+		}).when('/video/record',{
+			template: '<media-record type="video"></media-record>'
+		}).when('/audio/record',{
+			template: '<media-record type="audio"></media-record>'
 		}).otherwise({
 			redirectTo: '/'
 		});

@@ -21,12 +21,12 @@ angular.module('gui.menu').constant('MENU', {
 	},{
 		id: 'video-record',
 		name: 'Video Recording',
-		url: 'videorecord',
+		url: 'video/record',
 		template: ''
 	},{
 		id: 'audio-record',
 		name: 'Audio Recording',
-		url: 'audiorecord',
+		url: 'audio/record',
 		template: ''
 	}]
 })

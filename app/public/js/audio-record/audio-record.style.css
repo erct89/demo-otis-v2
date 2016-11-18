@@ -1,21 +1,21 @@
 audio-record #audiorecord-wrapper {
 	height: 100%;
 	background: #ffffff;
-}
+}/**/
 
 audio-record #audiorecord-wrapper .header{
 	background: #2098d1;
 	color: #ffffff;
 	padding-bottom: 1.5em; 
-}
+}/**/
 
 audio-record #audiorecord-wrapper .main{
 	height: calc(100% - 24px - 3.5em);
-}
+}/**/
 
 audio-record #audiorecord-wrapper .main #list-rec.card{
-	height: calc(100% - 48px - 6em);
-}
+	height: calc(100% - 24px - 3em);
+}/**/
 /*audio-record #audiorecord-wrapper .main li{
 	position: relative;
 	padding-top: 0.5em;
@@ -35,40 +35,40 @@ audio-record #audiorecord-wrapper .main li:first-child:before{
 }*/
 audio-record audio{
 	width: 100%;
-}
+}/**/
 
 audio-record #audiorecord-wrapper .main .card{
 	position: relative;
 	margin: 4px;
-}
+}/**/
 
 audio-record #audiorecord-wrapper .main .card-header{
 	background: #d7d7d7;
 	color: #ffffff;
-}
+}/**/
 audio-record #audiorecord-wrapper .card-header h2{
 	text-align: center;
-}
+}/**/
 audio-record #audiorecord-wrapper .card-header p{
 	font-size: small;
 	font-style: italic;
-}
+}/**/
 
 
-audio-record #audiorecord-wrapper .unsupport{
+audio-record #audiorecord-wrapper span.unsupport{
 	text-decoration: line-through;
 	color: #FF5555;
-}
+}/**/
 
 audio-record #audiorecord-wrapper #list-rec .card-main{
 	overflow-y: auto;
 	height: calc(100% - 80px);
-}
+}/**/
 
 audio-record .btn-control{
 	position: absolute !important;
 	margin-left: -1em;
-}
+}/**/
 
 .key{
 	font-weight: bold;
