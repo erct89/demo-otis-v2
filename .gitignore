@@ -2,3 +2,5 @@
 build/
 node_modules/
 app/public/libs/
+app/records/audio/*
+app/records/video/*
