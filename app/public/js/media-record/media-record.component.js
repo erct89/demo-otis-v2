@@ -81,6 +81,7 @@ angular.module('mediaRecord')
 							data:removeElement
 						}).then(function(res){
 							console.log(res);
+							console.log(index);
 							self.recs.splice(index,1);	
 						}).catch(function(error){
 							console.log(error);

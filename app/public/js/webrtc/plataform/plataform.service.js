@@ -7,11 +7,11 @@ angular.module('webrtc')
 		self.navigator = $window.navigator;
 		self.mimesType = {
 			firefox: {
-				audio: {mime: 'audio/ogg',subfix: 'oga'},
-				video:{mime: 'video/webm;codecs=vp8',subfix: 'webm'}
+				audio: {mime: 'audio/ogg', ext: 'oga'},
+				video:{mime: 'video/webm;codecs=vp8', ext: 'webm'}
 			},chrome:{
-				audio:{mime: 'audio/webm;codecs="opus"',subfix: 'opus'},
-				video:{mime: 'video/webm;codecs=vp9',subfix: 'webm'}
+				audio:{mime: 'audio/webm;codecs="opus"', ext: 'opus'},
+				video:{mime: 'video/webm;codecs=vp9', ext: 'webm'}
 			}
 		};
 
@@ -169,8 +169,8 @@ angular.module('webrtc')
 		};
 
 		self.getMineType = function() {
-			var os = self.getBrowser().name.toLowerCase(); 
-			return self.mimesType[os];
+			var browser = self.getBrowser().name.toLowerCase(); 
+			return self.mimesType[browser];
 		};
 
 		return {
