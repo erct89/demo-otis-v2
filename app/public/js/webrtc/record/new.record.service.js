@@ -186,70 +186,6 @@ angular.module('webrtc').service('Records',
 			});
 		};
 
-		/*
-			getUserMedia() //No funciona por culpa de que 'decodeAudioData(ArrayBuffer)'
-				- Description: Generar un MediaStream desde una grabación
-				< return: <Promise> then(MediaStream) or catch(error)
-
-		*/
-		/*
-		Record.prototype.getUserMedia = function() {
-			var that = this;
-			return new Promise(function(resolve, reject) {
-				//Comprobenos que tenermos todo lo necesario.
-				// 1.- Soporta la libreria AudioContext?
-				if(AudioContext){
-					//2.- Es una grabacion de audio?
-					if( Record.getType(that.mimeType.mime) === 'audio'){
-						// 3.- Este objeto contiene un objeto Blob?
-						if( that.blob){
-							// 4.- Necesito que el Blob este en formato ArrayBuffer!
-							blobToArrayBuffer(that.blob)
-								.then(function(arrayBuffer) {
-									//ArrayBuffer creado.
-									// 5.- Necisito crear un audioContext para poder trabajar sobre el audio.
-									let audio_context = new AudioContext();
-									let destination = audio_context.createMediaStreamDestination();
-									let source = null;
-									console.log(arrayBuffer);
-									// 6.- Decodifiquemos los datos del audio contenidos en el ArrayBuffer.
-									audio_context.decodeAudioData(arrayBuffer)
-										.then(function(buffer) {
-											// 7.- Ahora creemos la fuente de datos.
-											if(source !== null){
-												source.stop();
-												source.disconnect(0);
-												source = null
-											}
-											
-											source = audio_context.createBufferSource();
-											source.buffer = buffer;
-											source.start();
-											source.connect(destination);
-
-											//Retornando el mediaStream.
-											resolve(destination.stream);
-										}).catch(function(error) {
-											//Nooo
-											console.log("NOOOOOOO");
-											reject({error: error});
-										});
-								}).catch(function(error) {
-									//Oooooh no se ha podido crear un arraybuffer.
-									reject({error: error});
-								});
-						}else{
-							reject({error: "no recording"});
-						}
-					}else{
-						reject({error: "it is not an audio recording"});
-					}
-				}else{
-					reject({error: "no support for AudioContext API"});
-				}
-			});
-		};
-		*/
 
 		/*
 			getUserMedia() //Pasa lo mism, el problema no es ArrayBuffer es 'decodeAudioData(ArrayBuffer)'
@@ -257,7 +193,7 @@ angular.module('webrtc').service('Records',
 				< return: <Promise> then(MediaStream) or catch(error)
 
 		*/
-		/*
+		
 		Record.prototype.getUserMedia = function() {
 			var that = this;
 			return new Promise(function(resolve, reject) {
@@ -275,11 +211,15 @@ angular.module('webrtc').service('Records',
 									responseType: 'arraybuffer'
 								}).then(function(response) {
 									var audio_ctx = new AudioContext();
+									var audio_destination = audio_ctx.createMediaStreamDestination();
 									var audio_source = audio_ctx.createBufferSource();
 									
 									var prueba = audio_ctx.decodeAudioData(response.data,(s)=>{console.log("je");},(e)=>{console.log('jo');console.log(e);})
 										.then(function(audio_buffer) {
-											resolve(audio_buffer);
+											audio_source.buffer = audio_buffer;
+											audio_source.start();
+											audio_source.connect(audio_destination);
+											resolve(audio_destination.stream);
 										}).catch(function(error) {
 											reject(error);
 										});
@@ -297,106 +237,7 @@ angular.module('webrtc').service('Records',
 				}
 			});
 		};
-		*/
-
-		/*
-			getUserMedia() 
-				Probando a generar AudioBuffer a pelo.
-				- Description: Generar un MediaStream desde una grabación
-				< return: <Promise> then(MediaStream) or catch(error)
-		*/
-		/*Record.prototype.getUserMedia = function() {
-			var that = this;
-
-			return new Promise(function(resolve, reject) {
-				if(AudioContext){
-					if(Record.getType(that.mimeType.mime) === 'audio'){
-						if(that.name){
-							$http({
-								method: "GET",
-								url: "records/audio/" + that.name,
-								responseType: "arraybuffer"
-							}).then(function(response) {
-								let blob = new Blob(response.data);
-								
-								blobToArrayBuffer(blob).then(function(array_buffer) {
-									let channels = 1;
-									array_buffer = new DataView(array_buffer.buffer);
-									let ab_length = array_buffer.byteLength;
-									let audio_ctx = new AudioContext();
-									let audio_buffer = audio_ctx.createBuffer(1,ab_length,48000);
-									let destination = audio_ctx.createMediaStreamDestination();
-									for (var channel = 0; channel < channels; channel++) {
-										// This gives us the actual ArrayBuffer that contains the data
-										var nowBuffering = audio_buffer.getChannelData(channel);
-										for (var i = 0; i < ab_length; i++) {
-										// Math.random() is in [0; 1.0]
-										// audio needs to be in [-1.0; 1.0]
-											nowBuffering[i] = array_buffer.getInt8(i);
-										}
-									}
-									let audio_source = audio_ctx.createBufferSource();
-									audio_source.buffer = audio_buffer;
-									audio_source.start();
-									audio_source.connect(destination);
-
-									resolve(destination.stream);
-								}).catch(function(error) {
-									reject(error);
-								});
-							}).catch(function(error) {
-								reject(error);
-							});
-						}else{
-							reject({error: "no recording"});
-						}
-					}else{
-						reject({error: "it is not an audio recording"});
-					}
-				}else{
-					reject({error: "no support for AudioContext API"});
-				}
-			});
-		};*/
-
-		Record.prototype.getUserMedia = function() {
-			var that = this;
-			return new Promise(function(resolve, reject) {
-				if(AudioContext){
-					var ctx = new AudioContext();
-					var src = ctx.createBufferSource();
-					that.get().then(function(record) {
-							return blobToArrayBuffer(record.blob);
-						}).then(function(array_buffer) {
-							let channels = 1;
-							let buffer = new DataView(array_buffer);
-							let length = buffer.byteLength;
-							let audio_buffer = ctx.createBuffer(channels,length,48000);
-							let destination = ctx.createMediaStreamDestination();
-
-							for (var channel = 0; channel < channels; channel++) {
-								// This gives us the actual ArrayBuffer that contains the data
-								var nowBuffering = audio_buffer.getChannelData(channel);
-								for (var i = 0; i < length; i++) {
-								// Math.random() is in [0; 1.0]
-								// audio needs to be in [-1.0; 1.0]
-									nowBuffering[i] = buffer.getUint8(i);
-								}
-							}
-
-							src.buffer = audio_buffer;
-							src.start();
-							src.connect(destination);
-
-							resolve(destination.stream);
-						}).catch(function(error) {
-							reject(error);
-						});
-				}else{
-					reject({error: "no support for AudioContext API"});
-				}
-			});
-		};
+		
 		
 		/*
 			getType()

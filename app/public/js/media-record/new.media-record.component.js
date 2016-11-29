@@ -104,9 +104,10 @@ angular.module('mediaRecord')
 								rec = record;
 								//rec.blob = Records.blobToB64(record.blob);
 								rec.getUserMedia()
-									.then(function(mStream) {
-										//console.log(mStream);
-										self.input = $sce.trustAsResourceUrl(Records.getBlobURL(mStream));
+									.then(function(mstream) {
+										console.log(mstream);
+										//rec = record;
+										self.input = $sce.trustAsResourceUrl(Records.getBlobURL(mstream));
 									}).catch(function(error) {
 										console.log(error);
 									}); 
