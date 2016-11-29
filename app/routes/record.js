@@ -4,75 +4,76 @@ const path = require('path');
 var record = {};
 
 record.all = function(req, res){
-	var recs = {audio:[],video:[]};
-	
-	getFilesDir('app\\records\\audio',{encoding: 'utf8'})
+	let recs = {audio:[],video:[]};
+	let pathfile = 'app\\public\\records\\';
+
+	getFilesDir(pathfile + 'audio',{encoding: 'utf8'})
 		.then(function(files) {
 			recs.audio = files || [];
-			return getFilesDir('app\\records\\video', {encoding: 'utf8'});
+			return getFilesDir(pathfile + 'video', {encoding: 'utf8'});
 		}).then(function(files) {
 			recs.video = files || [];
 			res.json(recs);
-		}).catch(function(err) {
-			res.status(404).json({error: err});
+		}).catch(function(error) {
+			res.status(404).json({"error": error});
 		});
 };
 
 record.list = function(req, res){
-	var type = req.params.type || null;
-	var url = `app\\records\\${type}`;
-	var recs = {};
+	let type = req.params.type || null;
+	let pathfile = `app\\public\\records\\${type}`;
+	let recs = {};
 	
 	if(type){
 		recs[type] = [];
-		getFilesDir(url,{encoding:'utf8'})
+		getFilesDir(pathfile,{encoding:'utf8'})
 			.then(function(files) {
 				recs[type] = files;
 				res.json(recs);
-			}).catch(function(err) {
-				res.status(404).json(err);
+			}).catch(function(error) {
+				res.status(404).json(error);
 			});
 	}else{
-		res.status(404).json({error: "Tipo no permitido."});
+		res.status(404).json({"error": "Tipo no permitido."});
 	}
 };
 
 record.get = function(req, res) {
-	var type = req.params.type;
-	var id = req.params.id;
-	var dir = `app\\records\\${type}`;
-	var fileName = null;
+	let type = req.params.type;
+	let id = req.params.id;
+	let pathfile = `app\\public\\records\\${type}`;
+	let fileName = null;
 
-	getFilesDir(dir,{encoding:'utf8'})
+	getFilesDir(pathfile,{encoding:'utf8'})
 		.then(function(files) {
 			fileName = inArray(files,id);
 			if(fileName){
-				dir += `\\${fileName}`;
-				fs.readFile(dir, {encoding:'Base64'}, function(err, data){
-					if(err){
-						res.status(404).json({error: err});
+				pathfile += `\\${fileName}`;
+				fs.readFile(pathfile, {encoding:'Base64'}, function(error, data){
+					if(error){
+						res.status(404).json({"error": error});
 					}else{
 						res.json(data);
 					}
 				});
 			}else{
-				res.status(404).json({error:`File whose id is ${id} not found`});
+				res.status(404).json({"error":`File whose id is ${id} not found`});
 			}
-		}).catch(function(err) {
-			res.status(404).json({error: `File whose id is ${id} not found`});
+		}).catch(function(error) {
+			res.status(404).json({"error": `File whose id is ${id} not found`});
 		});
 };
 
 record.post = function(req, res){
-	var blob64 = req.body.data.blob64;
-	var name = req.body.data.name;
-	var type = req.params.type;
-	var url = `app\\records\\${type}\\${name}`;
-	var buffer = Buffer.from(blob64,'Base64');
+	let blob64 = req.body.data.blob64;
+	let name = req.body.data.name;
+	let type = req.params.type;
+	let pathfile = `app\\public\\records\\${type}\\${name}`;
+	let buffer = Buffer.from(blob64,'Base64');
 	
-	fs.writeFile(url,buffer,function(err){
-		if(err){
-			res.status(404).send(err);		
+	fs.writeFile(pathfile,buffer,function(error){
+		if(error){
+			res.status(404).send(error);		
 		}else{
 			res.send("OK");
 		}
@@ -82,17 +83,17 @@ record.post = function(req, res){
 record.delete =  function(req, res){
 	var type = req.params.type;
 	var id = req.params.id;
-	var dir = `app\\records\\${type}`;
+	var pathfile = `app\\public\\records\\${type}`;
 	var fileName = null;
 
-	getFilesDir(dir, {encoding:'utf8'})
+	getFilesDir(pathfile, {encoding:'utf8'})
 		.then(function(files) {
 			fileName = inArray(files,id);
 
 			if(fileName){
-				dir += `\\${fileName}`;
-				fs.unlink(dir, function(err){
-					if(err){
+				pathfile += `\\${fileName}`;
+				fs.unlink(pathfile, function(error){
+					if(error){
 						res.status(404).send();
 					}else{
 						res.status(200).send();
@@ -108,39 +109,38 @@ record.delete =  function(req, res){
 
 
 /*
-	getFilesDir(dir, options)
+	getFilesDir(path, options)
 		- Description: Obtener la lista de ficheros que hay en un directorio.
-		> dir: <String> directorio donde hay que buscar.
+		> path: <String> directorio donde hay que buscar.
 		> options: <Object> {encoding: 'uft8'}
 		< return: <Array> Lista con los nombres contenidos en el directorio.
 */
-var getFilesDir = function(dir, options) {
+var getFilesDir = function(pathfile, options) {
 	return new Promise(function(resolve, reject){
-		fs.readdir(dir,options,function(err, files){
-			if(err){
-				reject(err);
+		fs.readdir(pathfile, options,function(error, files){
+			if(error){
+				reject(error);
 			}
-
 			resolve(files);
 		});
 	});
 };
 
 /*
-	getFilesDatas(dir, filesNames, options)
+	getFilesDatas(pathfile, filesNames, options)
 		- Description: Devuelve los datos contenidos dentro de un array de ficheros.
-		> dir: <String> Path donde hay que buscar los ficheros.
+		> pathfile: <String> Path donde hay que buscar los ficheros.
 		> filesNames: <Array <String> > Lista de ficheros.
 		> options: <Object> Opciones que hay que pasar a fs.readFile().
 		< return: <Promise>
 */
-var getFilesDatas = function(dir, filesNames, options){
-	dir = (typeof(dir)==='string')? dir: '';
+var getFilesDatas = function(pathfile, filesNames, options){
+	pathfile = (typeof(pathfile)==='string')? pathfile: '';
 	filesNames = Array.isArray(filesNames)? filesNames: [];
 	return new Promise(function(resolve, reject){
 		var files = [];
 		for(let fileName of filesNames){
-			let pathfile = path.normalize(dir + fileName);
+			let pathfile = path.normalize(pathfile + fileName);
 			let fileInfo = fs.statSync(pathfile);
 			
 			if(fileInfo.isFile()){
@@ -150,7 +150,6 @@ var getFilesDatas = function(dir, filesNames, options){
 
 		Promise.all(files)
 			.then((datas)=>{
-				console.log(datas);
 				resolve(datas);
 			}).catch((error)=>{
 				console.log(error);
@@ -160,9 +159,9 @@ var getFilesDatas = function(dir, filesNames, options){
 };
 
 //Envuelve el metodo fs.readFile en un fichero
-var readFilesPromise = function(path, options){
+var readFilesPromise = function(pathfile, options){
 	return new Promise((resolve,reject)=>{
-		fs.readFile(path,options,(error, data)=>{
+		fs.readFile(pathfile,options,(error, data)=>{
 			if(error){
 				reject(error);
 			}else{

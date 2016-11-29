@@ -10,7 +10,7 @@ angular.module('webrtc')
 				audio: {mime: 'audio/ogg', ext: 'oga'},
 				video:{mime: 'video/webm;codecs=vp8', ext: 'webm'}
 			},chrome:{
-				audio:{mime: 'audio/webm;codecs="opus"', ext: 'opus'},
+				audio:{mime: 'audio/webm;codecs=opus', ext: 'opus'},
 				video:{mime: 'video/webm;codecs=vp9', ext: 'webm'}
 			}
 		};

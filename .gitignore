@@ -4,3 +4,5 @@ node_modules/
 app/public/libs/
 app/records/audio/
 app/records/video/
+app/public/records/audio/
+app/public/records/video/

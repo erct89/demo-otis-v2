@@ -10,8 +10,8 @@ angular.module('mediaRecord')
 		bindings:{
 				type: '@',
 			},
-		controller: ['Plataform', 'Records', 'Device', 'Util', '$sce', '$scope',
-			function(Plataform, Records, Device, Util, $sce, $scope){
+		controller: ['Plataform', 'Records', 'Device', '$sce', '$scope',
+			function(Plataform, Records, Device, $sce, $scope){
 				var self = this;
 				var type = self.type;
 				var constraints = {audio: false, video: false};
@@ -99,14 +99,22 @@ angular.module('mediaRecord')
 					var  rec = self.recs[index];
 
 					if(!rec.blob){
-						rec.get().then(function(record) {
-							rec.blob = Records.blobToB64(record.blob);
-							self.input = $sce.trustAsResourceUrl(Records.getBlobURL(rec.blob));
-						}).catch(function(error) {
-							console.log(error);
-						});
+						rec.get()
+							.then(function(record) {
+								rec = record;
+								//rec.blob = Records.blobToB64(record.blob);
+								rec.getUserMedia()
+									.then(function(mStream) {
+										//console.log(mStream);
+										self.input = $sce.trustAsResourceUrl(Records.getBlobURL(mStream));
+									}).catch(function(error) {
+										console.log(error);
+									}); 
+							}).catch(function(error) {
+								console.log(error);
+							});
 					}else{
-						self.input = $sce.trustAsResourceUrl(Records.getBlobURL(rec.blob));
+						//self.input = $sce.trustAsResourceUrl(Records.getBlobURL(rec.blob));
 					}
 				};
 
