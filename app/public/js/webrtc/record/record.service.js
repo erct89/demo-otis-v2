@@ -191,10 +191,10 @@ angular.module('webrtc').service('Records',
 			var that = this;
 			return new Promise(function(resolve, reject) {
 				//Comprobenos que tenermos todo lo necesario.
-				// 1.- Soporta la libreria AudioContext?
-				if(AudioContext){
-					//2.- Es una grabacion de audio?
-					if( Record.getType(that.mimeType.mime) === 'audio'){
+				// 1.- Es una grabacion de audio?
+				if( Record.getType(that.mimeType.mime) === 'audio' ){
+					//2.- Soporta la libreria AudioContext?
+					if( AudioContext ){
 						// 3.- Este objeto contiene un objeto Blob?
 						if( that.name){
 							// 4.- Necesito que el Blob este en formato ArrayBuffer!

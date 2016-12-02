@@ -40,31 +40,40 @@ angular.module('webrtc')
 				constraints = (typeof(constraints)==='object')? constraints: {};
 				var message;
 				return new Promise(function(resolve,reject){
-					//Si se ha pedido un stream de audio comprobar que existe soporte para audio
-					if(constraints.audio !== checkConstraint('audio')){
-						message = 'No support for audio devices';
-					}
-					//Si se ha pedio un stream de video, comprobar que hay soporte para video.
-					if(constraints.video !== checkConstraint('video')){
-						message = 'No support for video devices';	
-					}
+					//Debe existir en al menos una propiedad audio o video
+					if( (constraints.audio || constraints.video ) ){
+						//Si se ha pedido un stream de audio comprobar que existe soporte para audio
+						if( constraints.audio ){
+							if( !checkConstraint('audio') ){ //Hay soporte para audio.
+								message = 'No support for audio devices';
+							}
+						}
+						//Si se ha pedio un stream de video, comprobar que hay soporte para video.
+						if( constraints.video ){
+							if( !checkConstraint('video') ){ //Hay soporte para video.
+								message = 'No support for video devices';	
+							}
+						}
 
-					/*
-						Comprobar si ya existe un mediaStream y si hay soporte 
-						para el dispositivo requerido.
-					*/
-					if(!self.media_stream && !message){
-						self.userMedia(self.constraints)
-							.then(function (mediaStream) {
-								self.media_stream = mediaStream;
-								self.state = states[2];
-								resolve(self.media_stream);
-							}).catch(function(error){
-								reject(error);
-							});
+						/*
+							Comprobar si ya existe un mediaStream y si hay soporte 
+							para el dispositivo requerido.
+						*/
+						if(!self.media_stream && !message){
+							self.userMedia(self.constraints)
+								.then(function (mediaStream) {
+									self.media_stream = mediaStream;
+									self.state = states[2];
+									resolve(self.media_stream);
+								}).catch(function(error){
+									reject(error);
+								});
+						}else{
+							message = message || 'There is already a device in use';
+							reject(message);
+						}
 					}else{
-						message = message || 'There is already a device in use';
-						reject(message);
+
 					}
 				});
 			};

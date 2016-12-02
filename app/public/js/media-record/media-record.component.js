@@ -87,7 +87,8 @@ angular.module('mediaRecord')
 				self.save = function(){
 					//1.- Anadir la actual grabacion al array de grabaciones.
 					//2.- Cambiar el estado del modulo.
-					recordObject.save().then(function(data) {
+					recordObject.save()
+						.then(function(data) {
 							self.recs.push(recordObject);
 							changeState(1);
 						}).catch(function(error) {
@@ -97,26 +98,19 @@ angular.module('mediaRecord')
 
 				self.play = function(index){
 					var  rec = self.recs[index];
-
-					if(!rec.blob){
-						rec.get()
-							.then(function(record) {
-								rec = record;
-								//rec.blob = Records.blobToB64(record.blob);
-								rec.getUserMedia()
-									.then(function(mstream) {
-										console.log(mstream);
-										//rec = record;
-										self.input = $sce.trustAsResourceUrl(Records.getBlobURL(mstream));
-									}).catch(function(error) {
-										console.log(error);
-									}); 
-							}).catch(function(error) {
-								console.log(error);
-							});
-					}else{
-						//self.input = $sce.trustAsResourceUrl(Records.getBlobURL(rec.blob));
-					}
+					rec.get()
+						.then(function(record) {
+							rec = record;
+							if(type === 'audio'){
+								return rec.getUserMedia();	
+							}else if( type === 'video'){
+								return rec.blob;
+							}
+						}).then(function(mstream) {
+							self.input = $sce.trustAsResourceUrl(Records.getBlobURL(mstream));
+						}).catch(function(error) {
+							console.log(error);
+						});
 				};
 
 				var changeState = function(index){

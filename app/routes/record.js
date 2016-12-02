@@ -3,68 +3,133 @@ const path = require('path');
 const ffmpeg = require('fluent-ffmpeg');
 
 let record = {};
+record.files = null; //Variable que agiliza el servidor.
 
-record.all = function(req, res){
-	let recs = {audio:[],video:[]};
+/*
+	record.getRecords(req, res, next, type){
+		- Description: La utilizo para cargar si es necesario la lista de ficheros de
+		grabaciones que hay en el servidor. Para ello utilizo el parametro ':type' de
+		la URL. El objeto de ficheros es cargaddo en el objeto 'record' en una propiedad
+		llamada 'files'.
+	}
+*/
+record.getRecords = function(req, res, next, type) {
 	let pathfile = 'app\\public\\records\\';
-
-	getFilesDir(pathfile + 'audio',{encoding: 'utf8'})
-		.then((files) => {
-			recs.audio = files || [];
-			return getFilesDir(pathfile + 'video', {encoding: 'utf8'});
-		}).then((files) => {
-			recs.video = files || [];
-			res.json(recs);
-		}).catch((error) => {
-			res.status(404).json({"error": error});
-		});
-};
-
-record.list = function(req, res){
-	let type = req.params.type || null;
-	let pathfile = `app\\public\\records\\${type}`;
-	let recs = {};
-	
-	if(type){
-		recs[type] = [];
-		getFilesDir(pathfile,{encoding:'utf8'})
+	if(!record.files){
+		getFilesDir(pathfile + 'audio',{encoding: 'utf8'}) //Cargar las grabaciones de audio.
 			.then((files) => {
-				recs[type] = files;
-				res.json(recs);
+				console.log('Cargando Grabaciones de Audios:');
+				console.log(files);
+				record.files = {};
+				record.files.audio = files || [];
+				return getFilesDir(pathfile + 'video', {encoding: 'utf8'});
+			}).then((files) => {
+				console.log('Cargadas grabaciones de Video:');
+				console.log(files);
+				record.files.video = files || [];
+				next();
 			}).catch((error) => {
-				res.status(404).json(error);
+				console.log('Error en getRecords');
+				next(error);
 			});
 	}else{
-		res.status(404).json({"error": "Tipo no permitido."});
+		next();
 	}
 };
 
-record.get = function(req, res) {
+/*
+	record.getRecords(req, res, next, type){
+		- Description: Utilizado para que cuando existe un parametro :id, cargemos el
+		fichero que este :id indica.
+	}
+*/
+record.getRecord = function(req, res, next, id) {
+	//let pathfile = `app\\public\\records\\${req.param.type}`;
+	req.file = inArray(record.files.audio, id);
+	req.file = req.file || inArray(record.files.video, id);
+	
+	if(req.file){
+		next();
+	}else{
+		console.log(`Error: File whose id is ${id} not found`);
+		next(new Error(`File whose id is ${id} not found`));
+	}
+};
+
+/*
+	record.all(req, res){
+		- Description: La uso para la siguiente URL: "../records/". Realiza la 
+		busqueda de todos los ficheros de audio y video, si los encuentra retorna 
+		un objeto con el siguiente formato: "{ audio: string[],	video: string[]	} ".
+		  De ocurrir algun problema se envia un HTTP con status 404, con los datos 
+		de error.
+		> req: <HttpRequest>  Objeto que representa la peticion.
+		> res: <HttpResponse> Objeto que representa la respuesta.
+	}
+*/
+record.all = function(req, res){
+	res.json(record.files);
+};
+
+/*
+	record.list(req,res){
+		- Description: La uso para atender la peticion "../records/:type". Realiza la 
+		busqueda de todos los ficheros de un tipo (audio|video) y los retorna en 
+		envuelto en un objeto con el sigueinte formato: 
+		"{ audio: string[], video: string[] }".
+		  De ocurrir algun problema se envia un HTTP con status 404, con los datos 
+		de error.
+		> req: <HttpRequest>  Objeto que representa la peticion.
+		> res: <HttpResponse> Objeto que representa la respuesta.
+	}
+*/
+record.list = function(req, res){
+	res.json(record.files);
+};
+
+/*
+	record.get(req.res){
+		- Description: La uso para atender a la peticion Http que apunta a 
+		"../record/:type/:id". 
+		  Realiza la busqueda del fichero indicado por su 'type' y su 'id'. 
+		  Si el fichero existe lo lee y lo envia en un json. De lo encotrarlo envia 
+		una respuesta HTTP con Status 404, junto con el error.
+		> req: <HttpRequest>  Objeto que representa la peticion.
+		> res: <HttpResponse> Objeto que representa la respuesta.
+	}
+*/
+record.get = function(req, res, next) {
 	let type = req.params.type;
 	let id = req.params.id;
-	let pathfile = `app\\public\\records\\${type}`;
-	let fileName = null;
+	let pathfile = `app\\public\\records\\${type}\\${req.file}`;
 
-	getFilesDir(pathfile,{encoding:'utf8'})
-		.then((files) => {
-			fileName = inArray(files,id);
-			if(fileName){
-				pathfile += `\\${fileName}`;
-				fs.readFile(pathfile, {encoding:'Base64'}, (error, data) => {
-					if(error){
-						res.status(404).json({"error": error});
-					}else{
-						res.json(data);
-					}
-				});
-			}else{
-				res.status(404).json({"error":`File whose id is ${id} not found`});
+	readFilesPromise(pathfile, {encoding:'Base64'})
+		.then( data => {
+			if(data){
+				console.log(`Fichero ${pathfile} encontrado y enviado.`);
+				res.json(data);
 			}
-		}).catch((error) => {
-			res.status(404).json({"error": `File whose id is ${id} not found`});
+		}).catch( error => {
+			console.log(error);
+			next(error);
 		});
 };
 
+/*
+	record.post(req, res){
+		- Description: La uso para atender a la peticion Http POST que apunta a 
+		"../record". 
+		  Recibe un objeto 'data' con una propiedad 'blob64' que representa un Blob con
+		en 'base64' y una propiedad 'name' que es el nombre del fichero.
+		  Si el tipo es 'audio' lo convierte a formato 'ogg' y si es un video lo 
+		separa en frames formato 'png'. Despues los guarda en su carpeta correspondiente
+		de "app/public/records/[video|audio|screenshot]".
+		  Cuando termina envia una respuesta HTTP con status 200 y un objeto con el nombre
+		del fichero.
+		> req: <HttpRequest>  Objeto que representa la peticion.
+		> res: <HttpResponse> Objeto que representa la respuesta.
+	}
+*/
 record.post = function(req, res){
 	let blob64 = req.body.data.blob64;
 	let name = req.body.data.name;
@@ -73,7 +138,7 @@ record.post = function(req, res){
 	let pathfile = `app\\public\\records\\${type}\\`;
 	let buffer = Buffer.from(blob64,'Base64');
 	
-	fs.writeFile(pathfile + name,buffer,(error) => {
+	fs.writeFile(pathfile + name, buffer, (error) => {
 		if(error){
 			res.status(404).send(error);		
 		}else{
@@ -112,28 +177,29 @@ record.post = function(req, res){
 	});
 };
 
-record.delete =  function(req, res){
+/*
+	record.delete(req, res){
+		- Description: La uso para atender a la peticion Http DELETE que apunta a 
+		"../record/:type/:id". Realiza la busqueda del fichero indicado por su
+		'type' y su 'id'. Si el fichero existe lo borrar. 
+		  Si el proceso se realiza se envia una respesta HTTP con Status 200.
+		  De no encotrar el fichero o ocurrir algún error durante el borrado, se envia 
+		una respuesta HTTP con Status 404, junto con el error.
+	}
+*/
+record.delete =  function(req, res, next){
 	let type = req.params.type;
-	let id = req.params.id;
-	let pathfile = `app\\public\\records\\${type}`;
-	let fileName = null;
+	let pathfile = `app\\public\\records\\${type}\\${req.file}`;
 
-	getFilesDir(pathfile, {encoding:'utf8'})
-		.then((files) => {
-			fileName = inArray(files,id);
-			if(fileName){
-				pathfile += `\\${fileName}`;
-				return deleteFile(pathfile);
-			}else{
-				res.status(404).send("File unknow, can´t delete");
-			}
-		}).then(() => {
+	deleteFile(pathfile)
+		.then(() => {
 			console.log(`Delete File: ${pathfile}`);
 			res.status(200).send();
+			record.files = null; //Se podria no borrar y solo borrar el correspondiente.
 		}).catch((error) => {
 			console.log(`Error Delete File: ${pathfile}`);
 			console.log(error);
-			res.status(404).send();
+			next(error);
 		});
 };
 
@@ -143,7 +209,7 @@ record.delete =  function(req, res){
 		- Description: Obtener la lista de ficheros que hay en un directorio.
 		> path: <String> directorio donde hay que buscar.
 		> options: <Object> {encoding: 'uft8'}
-		< return: <Array> Lista con los nombres contenidos en el directorio.
+		< return: <Promise> Then(string []) o catch(error).
 */
 var getFilesDir = function(pathfile, options) {
 	return new Promise((resolve, reject) => {
@@ -188,7 +254,14 @@ var getFilesDatas = function(pathfile, filesNames, options){
 	});
 };
 
-//Envuelve el metodo fs.readFile en un fichero
+/*
+	readFilesPromise(pathfile, options){
+		- Description: Envuelve el metodo fs.readFile como una promesa. 
+		> pathfile: <string> ruta del fichero.
+		> options: <object> Opciones que hay que pasar a fs.readFile().
+		< return: <Promise> then(data) o catch(error). 
+	}
+*/
 var readFilesPromise = function(pathfile, options){
 	return new Promise((resolve,reject)=>{
 		fs.readFile(pathfile,options,(error, data)=>{
@@ -201,6 +274,35 @@ var readFilesPromise = function(pathfile, options){
 	});
 };
 
+
+/*
+	readFilesPromise(pathfile, options){
+		- Description: Envuelve el metodo fs.readFile como una promesa. 
+		> pathfile: <string> ruta del fichero.
+		> options: <object> Opciones que hay que pasar a fs.readFile().
+		< return: <Promise> then(data) o catch(error). 
+	}
+*/
+var writeFilesPromise = function(pathfile, buffer){
+	return new Promise((resolve,reject)=>{
+		fs.writeFile(pathfile, buffer,(error, data)=>{
+			if(error){
+				reject(error);
+			}else{
+				resolve(data);
+			}
+		});
+	});
+};
+
+
+/*
+	deleteFile(pathfile){
+		- Description: Borra el fichero al que referencia la ruta.
+		> pathfile: <String> Direccion del fichero que hay que borrar.
+		< return: <Promise> then() o catch(error)
+	}
+*/
 //Borrar un fichero si es que existe.
 var deleteFile = function(pathfile) {
 	return new Promise((resolve, reject)=>{
@@ -214,6 +316,15 @@ var deleteFile = function(pathfile) {
 	});
 };
 
+/*
+	inArray(array, string){
+		- Description: Busca en un array un item que contenga el string pasado como 
+		parametro, si lo encuentro lo retorna, sino retorna null.
+		> array: <Array>
+		> string: <String>
+		< return: <String>||<null>
+	}
+*/
 //encontrar el primer elemento del array que contiene string.
 var inArray = function(array, string){
 	array = Array.isArray(array)?array:null;
