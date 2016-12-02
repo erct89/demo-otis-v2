@@ -2,7 +2,8 @@ var express = require('express'),
   path = require('path'),
   cookieParser = require('cookie-parser'),
   bodyParser = require('body-parser'),
-  fs = require('fs');
+  fs = require('fs'),
+  ffmpeg = require('fluent-ffmpeg');
 
 var routes = require('./routes');
 var record = require('./routes/record.js').record;
