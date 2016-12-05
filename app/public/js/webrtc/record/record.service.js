@@ -125,6 +125,7 @@ angular.module('webrtc').service('Records',
 								headers:{'Content-type':'application/json'}
 							});
 						}).then(function(data) {
+							that.name = data.data.name;
 							resolve(data);
 						}).catch(function(error) {
 							reject(error);

@@ -4,6 +4,10 @@ const ffmpeg = require('fluent-ffmpeg');
 
 let record = {};
 record.files = null; //Variable que agiliza el servidor.
+record.pathFile = 'app\\public\\records\\';
+record.pathVideo =  record.pathFile +'video\\';
+record.pathScreen =  record.pathFile + 'screenshot\\';
+record.pathAudio =  record.pathFile +'audio\\';
 
 /*
 	record.getRecords(req, res, next, type){
@@ -14,26 +18,29 @@ record.files = null; //Variable que agiliza el servidor.
 	}
 */
 record.getRecords = function(req, res, next, type) {
-	let pathfile = 'app\\public\\records\\';
-	if(!record.files){
-		getFilesDir(pathfile + 'audio',{encoding: 'utf8'}) //Cargar las grabaciones de audio.
-			.then((files) => {
-				console.log('Cargando Grabaciones de Audios:');
-				console.log(files);
-				record.files = {};
-				record.files.audio = files || [];
-				return getFilesDir(pathfile + 'video', {encoding: 'utf8'});
-			}).then((files) => {
-				console.log('Cargadas grabaciones de Video:');
-				console.log(files);
-				record.files.video = files || [];
-				next();
-			}).catch((error) => {
-				console.log('Error en getRecords');
-				next(error);
-			});
+	if(type === 'audio' || type === 'video'){
+		if(!record.files){
+			getFilesDir(record.pathAudio,{encoding: 'utf8'}) //Cargar las grabaciones de audio.
+				.then((files) => {
+					console.log('Cargando Grabaciones de Audios:');
+					console.log(files);
+					record.files = {};
+					record.files.audio = files || [];
+					return getFilesDir(record.pathVideo, {encoding: 'utf8'});
+				}).then((files) => {
+					console.log('Cargadas grabaciones de Video:');
+					console.log(files);
+					record.files.video = files || [];
+					next();
+				}).catch((error) => {
+					console.log('Error en getRecords');
+					next(error);
+				});
+		}else{
+			next();
+		}
 	}else{
-		next();
+		next(new Error('Only records audio or video files.'))
 	}
 };
 
@@ -44,9 +51,11 @@ record.getRecords = function(req, res, next, type) {
 	}
 */
 record.getRecord = function(req, res, next, id) {
-	//let pathfile = `app\\public\\records\\${req.param.type}`;
-	req.file = inArray(record.files.audio, id);
-	req.file = req.file || inArray(record.files.video, id);
+	if(req.params.type === 'audio'){
+		req.file = inArray(record.files.audio, id);
+	}else if(req.params.type === 'video'){ 
+		req.file = inArray(record.files.video, id); 
+	}
 	
 	if(req.file){
 		next();
@@ -99,9 +108,7 @@ record.list = function(req, res){
 	}
 */
 record.get = function(req, res, next) {
-	let type = req.params.type;
-	let id = req.params.id;
-	let pathfile = `app\\public\\records\\${type}\\${req.file}`;
+	let pathfile = record.pathFile + req.params.type + '\\' + req.file;
 
 	readFilesPromise(pathfile, {encoding:'Base64'})
 		.then( data => {
@@ -116,7 +123,7 @@ record.get = function(req, res, next) {
 };
 
 /*
-	record.post(req, res){
+	record.postVideo(req, res){
 		- Description: La uso para atender a la peticion Http POST que apunta a 
 		"../record". 
 		  Recibe un objeto 'data' con una propiedad 'blob64' que representa un Blob con
@@ -130,52 +137,120 @@ record.get = function(req, res, next) {
 		> res: <HttpResponse> Objeto que representa la respuesta.
 	}
 */
-record.post = function(req, res){
+record.post = function(req, res, next) {
+	if(req.params.type === 'audio'){
+		record.postAudio(req,res,next);
+	}else if(req.params.type === 'video'){
+		record.postVideo(req,res,next);
+	}else{
+		next(new Error(`The type "${req.params.type}" is a recording not accepted`));
+	}
+}
+
+record.postVideo = function(req, res, next){
 	let blob64 = req.body.data.blob64;
-	let name = req.body.data.name;
-	let newName = null
-	let type = req.params.type;
-	let pathfile = `app\\public\\records\\${type}\\`;
-	let buffer = Buffer.from(blob64,'Base64');
-	
-	fs.writeFile(pathfile + name, buffer, (error) => {
-		if(error){
-			res.status(404).send(error);		
-		}else{
-			if(type === 'audio'){
-				//Convirtiendo el fichero opus a un fichero ogg.
-				newName = req.body.data.name.match(/^audio_(\d{13})./)[0] + 'ogg';
-				ffmpeg(pathfile + name)
-					.on('error',(error)=>{
-						console.log(error);
-					}).on('end',() =>{
-						console.log('Finalizado');
-						deleteFile(__dirname +'\\..\\..\\' + pathfile + name)
-							.then(()=>{
-								res.send("OK");
-								console.log('Delete: ' + __dirname +'\\..\\..\\' + pathfile + newName);
-							}).catch((error) => {
-								res.status(404).send(error);
-								console.log('Can´t delete: ' + __dirname +'\\..\\..\\' + pathfile + newName);
-							});
-						
-					}).save(__dirname +'\\..\\..\\' + pathfile + newName);
-			}else if(type === 'video'){
-				res.send("OK");
-				newName = req.body.data.name.match(/^video_(\d{13})/)[0] + "_%06d.png";
-	
-				ffmpeg(__dirname +'\\..\\..\\' + pathfile + name)
-					.fps(30)
-					.outputOptions('-r 30')
-					.on('error', error => {	console.log(error); })
-					.on('end',()=>{ console.log("Finalizado ficheros generados."); })
-					.save('app\\public\\records\\screenshot\\' + newName);
+	let pattern = /^(video)_(\d{13}).(webm)$/;
+	let name = req.body.data.name.match(pattern);
+	let buffer = null; command = null;
+
+	if(blob64){
+		if(name){
+			buffer = Buffer.from(blob64,'Base64');
+			command = ffmpeg(record.pathVideo + `${name[2]}.webm` )
+				.fps(30)
+				.output(record.pathScreen + `${name[2]}-%06d.png`)
+				.outputOptions('-r 30')
+				.output(record.pathAudio + `${name[2]}.ogg`)
+				.on('error', error => {
+					next(error);
+				}).on('end', () => {
+					console.log(`End save screenshots of ${name[2]}.webm`);
+					record.files.video.push(`${name[2]}.webm`);
+					record.files.audio.push(`${name[2]}.ogg`);
+					res.json({name: `${name[2]}.webm` });
+				});
+			if(buffer instanceof Buffer){
+				writeFilesPromise(record.pathVideo + `${name[2]}.webm` , buffer)
+					.then(() => {
+						console.log(`End save video file ${name[2]}.webm`)
+						command.run();
+					}).catch(error => {
+						next(error);
+					});
+				/*fs.writeFile(record.pathVideo + `${name[2]}.webm` , buffer, error => {
+					if(error){
+						next(error);
+					}else{
+						console.log(`End save video file ${name[2]}.webm`)
+						command.run();
+					}
+				});*/
 			}else{
-				res.status(404).send(`${type} isn't supported, only audio or video`);
+				next('The arugument blob64 isn´t correct');
 			}
+		}else{
+			next('The name argument missing or format incorrect');
 		}
-	});
+	}else{
+		next('The blob64 argument missing');
+	}
 };
+
+
+/*
+	record.postAudio(req, res){
+		- Description: La uso para atender a la peticion Http POST que apunta a 
+		"../record". 
+		  Recibe un objeto 'data' con una propiedad 'blob64' que representa un Blob con
+		en 'base64' y una propiedad 'name' que es el nombre del fichero.
+		  Si el tipo es 'audio' lo convierte a formato 'ogg' y si es un video lo 
+		separa en frames formato 'png'. Despues los guarda en su carpeta correspondiente
+		de "app/public/records/[video|audio|screenshot]".
+		  Cuando termina envia una respuesta HTTP con status 200 y un objeto con el nombre
+		del fichero.
+		> req: <HttpRequest>  Objeto que representa la peticion.
+		> res: <HttpResponse> Objeto que representa la respuesta.
+	}
+*/
+record.postAudio = function(req, res, next){
+	let blob64 = req.body.data.blob64;
+	let pattern = /^(audio)_(\d{13}).(opus|ogg)$/;
+	let name = req.body.data.name.match(pattern);
+	let pathfile = record.pathAudio + 'audio\\' , buffer = null; command = null;
+
+	if(blob64){
+		if(name){
+			buffer = Buffer.from(blob64,'Base64');
+			command = ffmpeg(record.pathAudio + name[0]).on('error', error => {
+				next(error);
+			}).on('end', () => {
+				deleteFilesPromise(record.pathAudio + name[0])
+					.then(() => {
+						record.files.audio.push(`${name[2]}.ogg`); 
+						res.json({name: `${name[2]}.ogg` });
+					}).catch( error => {
+						next(error);
+					});
+			});
+			if(buffer instanceof Buffer){
+				fs.writeFile(record.pathAudio + req.body.data.name , buffer, error => {
+					if(error){
+						next(error);
+					}else{
+						command.save(`${record.pathAudio}${name[2]}.ogg`);
+					}
+				});
+			}else{
+				next('The arugument blob64 isn´t correct');
+			}
+		}else{
+			next('The name argument missing or format incorrect');
+		}
+	}else{
+		next('The blob64 argument missing');
+	}
+};
+
 
 /*
 	record.delete(req, res){
@@ -188,10 +263,9 @@ record.post = function(req, res){
 	}
 */
 record.delete =  function(req, res, next){
-	let type = req.params.type;
-	let pathfile = `app\\public\\records\\${type}\\${req.file}`;
+	let pathfile = record.pathFile + req.params.type + '\\' + req.file;
 
-	deleteFile(pathfile)
+	deleteFilesPromise(pathfile)
 		.then(() => {
 			console.log(`Delete File: ${pathfile}`);
 			res.status(200).send();
@@ -273,8 +347,6 @@ var readFilesPromise = function(pathfile, options){
 		});
 	});
 };
-
-
 /*
 	readFilesPromise(pathfile, options){
 		- Description: Envuelve el metodo fs.readFile como una promesa. 
@@ -285,7 +357,7 @@ var readFilesPromise = function(pathfile, options){
 */
 var writeFilesPromise = function(pathfile, buffer){
 	return new Promise((resolve,reject)=>{
-		fs.writeFile(pathfile, buffer,(error, data)=>{
+		fs.writeFile(pathfile, buffer, (error, data) => {
 			if(error){
 				reject(error);
 			}else{
@@ -304,7 +376,7 @@ var writeFilesPromise = function(pathfile, buffer){
 	}
 */
 //Borrar un fichero si es que existe.
-var deleteFile = function(pathfile) {
+var deleteFilesPromise = function(pathfile) {
 	return new Promise((resolve, reject)=>{
 		fs.unlink(pathfile, (error) => {
 			if(error){

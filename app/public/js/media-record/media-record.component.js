@@ -88,7 +88,7 @@ angular.module('mediaRecord')
 					//1.- Anadir la actual grabacion al array de grabaciones.
 					//2.- Cambiar el estado del modulo.
 					recordObject.save()
-						.then(function(data) {
+						.then(function(response) {
 							self.recs.push(recordObject);
 							changeState(1);
 						}).catch(function(error) {
