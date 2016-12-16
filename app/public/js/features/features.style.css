@@ -1,6 +1,7 @@
 features #features-wrapper {
 	height: 100%;
 	background: #ffffff;
+	overflow-y: auto;
 }
 
 features #features-wrapper .header{

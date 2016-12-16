@@ -2,7 +2,7 @@
 angular.module('otisDemo')
 	.config(['$routeProvider',function($routeProvider) {
 		$routeProvider.when('/',{
-			template:'<panel><features><h1>Hola<h1></features></panel>'
+			template:'<features><h1>Hola<h1></features>'
 		}).when('/videocall',{
 			template: '<video-call></video-call>'
 		}).when('/mirroring',{

@@ -6,6 +6,7 @@
     "angular": "*",
     "angular-ui-clock": "^0.5.1",
     "hover": "Hover#^2.0.2",
-    "adapterjs": "^0.14.0"
+    "adapterjs": "^0.14.0",
+    "janus-gateway": "janus#^0.2.0"
   }
 }

@@ -12,8 +12,8 @@ angular.module('features').component('features',{
 			var self = this;
 
 			var loadDependencies = function(){
-				var dif = Dependencies.getDependecies(); 
-				var support = Dependencies.getDependeciesSupport();
+				var dif = Dependencies.getDependencies(); 
+				var support = Dependencies.getDependenciesSupport();
 
 				dif = Util.differenceArray(dif, support);
 

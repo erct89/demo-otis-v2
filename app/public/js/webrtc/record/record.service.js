@@ -4,16 +4,17 @@ angular.module('webrtc').service('Records',
 	['Dependencies','Util','$rootScope','$http', function( Dependencies, Util, $rootScope, $http){
 		var self = this;
 		//Instancias de las multiples dependencias que queremos usar.
-		var MStream = Dependencies.getDependecy("window.MediaStream");
-		var MRecord = Dependencies.getDependecy("window.MediaRecorder");
-		var URL = Dependencies.getDependecy("window.URL");
-		var Blob = Dependencies.getDependecy("window.Blob");
-		var FReader = Dependencies.getDependecy("window.FileReader");
-		var AudioContext = Dependencies.getDependecy("window.AudioContext");
+		var MStream = Dependencies.getDependency("window.MediaStream");
+		var MRecord = Dependencies.getDependency("window.MediaRecorder");
+		var URL = Dependencies.getDependency("window.URL");
+		var Blob = Dependencies.getDependency("window.Blob");
+		var FReader = Dependencies.getDependency("window.FileReader");
+		var AudioContext = Dependencies.getDependency("window.AudioContext");
 
 		//Lista de atributos que deseamos gestionar.
 		var records = [] //Lista de Objetos Record.
 		var record = null;
+		var audio_ctx = new AudioContext(); //El contexto de audio usado por los records para generar el getUserMedia.
 
 		//Objeto Record a ser gestionado.
 		function Record(id, name, mstream, options) {
@@ -182,7 +183,7 @@ angular.module('webrtc').service('Records',
 
 
 		/*
-			getUserMedia() //Pasa lo mism, el problema no es ArrayBuffer es 'decodeAudioData(ArrayBuffer)'
+			getUserMedia() //Pasa lo mismo, el problema no es ArrayBuffer es 'decodeAudioData(ArrayBuffer)'
 				- Description: Generar un MediaStream desde una grabación
 				< return: <Promise> then(MediaStream) or catch(error)
 
@@ -204,7 +205,6 @@ angular.module('webrtc').service('Records',
 									url: 'records/audio/' + that.name,
 									responseType: 'arraybuffer'
 								}).then(function(response) {
-									var audio_ctx = new AudioContext();
 									var audio_destination = audio_ctx.createMediaStreamDestination();
 									var audio_source = audio_ctx.createBufferSource();
 									

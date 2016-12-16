@@ -1,9 +1,172 @@
-<div class="card">
-	<div class="header">
-		<h1>Video Call</h1>
-		<p>Realize de forma fácil y sencilla video llamadas con contras personas, atraves de Janus Gateway</p>
+<div id="videocall-wrapper">
+	<div class="header p" flex-container="row" flex-column="16" class="center" ng-class="{'bgc-amber-500': ($ctrl.state === 0)}">
+		<div flex-item="12">
+			<h1>Video Call</h1>
+			<p ng-show="$ctrl.state > 0">Comunique se de forma secilla.</p>
+			<p ng-show="$ctrl.state === 0">Capacidad no soportada.</p>
+		</div>
+		<div flex-item="4" 	flex-container="row" flex-column="16" style="margin: auto" 
+			ng-show="$ctrl.state > 0">
+			<div flex-item="14" flex-container="column" style="font-size: smaller;">
+				<div>
+					<label >Session ID:</label>
+					<input type="text"
+						ng-disabled="true"
+						ng-model="$ctrl.SessionId" 
+						style="background-color: transparent; color: white; border: none; border-bottom: 1px dashed white;">
+				</div>
+				<div>
+					<label>Handler Plugin ID:</label>
+					<input type="text"
+						ng-disabled="true"
+						ng-model="$ctrl.PluginHandlerId" 
+						style="background-color: transparent; color: white; border: none; border-bottom: 1px dashed white;">
+				</div>
+			</div>
+			<div flex-item="2" flex-container="column" class="center" style="font-size: smaller;">
+				<div ng-show="$ctrl.janusState <= 2">
+					<lx-button
+						lx-type="fab" 
+						lx-size="xs" 
+						lx-color="amber"  
+						lx-tooltip="Iniciar Sesion Janus" 
+						lx-tooltip-position="bottom"
+						ng-click="$ctrl.createSession()"
+						ng-class="{}">
+						<i class="mdi mdi-login"></i>
+					</lx-button>
+				</div>
+				<div flex-container="column" 
+					ng-show="$ctrl.janusState > 2 && $ctrl.janusState <= 3">
+					<div>
+					<lx-button
+						lx-type="fab" 
+						lx-size="xs" 
+						lx-color="red"  
+						lx-tooltip="Cerrar Sesion Janus" 
+						lx-tooltip-position="bottom"
+						ng-click="$ctrl.destroySession()"
+						ng-class="{}">
+						<i class="mdi mdi-logout"></i>
+					</lx-button>
+					</div>
+					<div>
+					<lx-button
+						lx-type="fab" 
+						lx-size="xs" 
+						lx-color="amber"  
+						lx-tooltip="Conectar al Plugin" 
+						lx-tooltip-position="bottom"
+						ng-click="$ctrl.attachPlugin()"
+						ng-class="{}">
+						<i class="mdi mdi-attachment"></i>
+					</lx-button>
+					</div>
+				</div>
+				<div ng-show="$ctrl.janusState > 3">
+					<lx-button
+						lx-type="fab" 
+						lx-size="xs" 
+						lx-color="red"  
+						lx-tooltip="Desconectar del Plugin" 
+						lx-tooltip-position="bottom"
+						ng-click="$ctrl.detachPlugin()"
+						ng-class="{}">
+						<i class="mdi mdi-close"></i>
+					</lx-button>
+				</div>
+			</div>
+		</div>
 	</div>
-	<div class="main">
-
+	<div class="main p" ng-class="{unsupport: ($ctrl.state === 0)}" flex-column>
+		<div flex-container="row" flex-column="16">
+			<div flex-item="6" id="showcase"> <!-- Delete -->
+				<div class="card-header"><h1>Stream Local</h1></div>
+				<video class="card p" controls="true" id="videoLocal" autoplay="" poster="images/otislogo.svg" ng-src="{{$ctrl.localStream}}"></video>
+			</div>
+			<div flex-item="6" id="showcase"> <!-- flex-item= "11" -->
+				<div class="card-header"><h1>Stream Remoto</h1></div>
+				<video class="card p" controls="true" id="videoRemote" autoplay="" poster="images/otislogo.svg" ng-src="{{$ctrl.remoteStream}}"></video>
+			</div>
+			<div flex-item="4" flex-container="column"> <!-- flex-item= "5" -->
+				<div class="card p++" id="">
+					<div class="card-main" flex-container="column">
+						<div flex-container="column">
+							<div ng-class="{'inactive': ($ctrl.state < 1 || $ctrl.state > 1)}">
+								<lx-text-field lx-label="Nombre de Usuario">
+									<input type="text"
+										ng-disabled="{{($ctrl.state < 1 && $ctrl.state > 1)}}" 
+										ng-model="$ctrl.userName" 
+										ng-class="">
+								</lx-text-field>
+							</div>
+							<div ng-class="{'inactive': ($ctrl.state < 2 || $ctrl.state > 3)}">
+								<lx-text-field lx-label="who should we call?">
+									<input type="text" 
+										ng-disabled="{{($ctrl.state < 2 && $ctrl.state > 3)}}"
+										ng-model="$ctrl.userCall" 
+										ng-class="">
+								</lx-text-field>
+							</div>
+							<div id="controls" 
+								flex-container="row" 
+								flex-column="12"
+								class="p++">
+								<div flex-item="4" class="center">
+								<lx-button 
+									lx-type="fab" 
+									lx-size="s" 
+									lx-color="blue"  
+									lx-tooltip="Registrar" 
+									lx-tooltip-position="bottom"
+									ng-click="$ctrl.login()"
+									class="btn-control"
+									ng-class="{
+										'inactive': ($ctrl.state > 1), 
+										'inactive-back': ($ctrl.state > 1)
+									}">
+									<i class="mdi mdi-account"></i>
+								</lx-button>
+								</div>
+								<div flex-item="4" class="center">
+								<lx-button 
+									flex-item="4"
+									lx-type="fab" 
+									lx-size="s" 
+									lx-color="green" 
+									lx-tooltip="Llamar" 
+									lx-tooltip-position="bottom"
+									ng-click="$ctrl.call()"
+									class="btn-control"
+									ng-class="{
+										'inactive': ($ctrl.state < 2 || $ctrl.state > 3), 
+										'inactive-back': ($ctrl.state < 2 || $ctrl.state > 3 )
+									}">
+									<i class="mdi mdi-call-made"></i>
+								</lx-button>
+								</div>
+								<div flex-item="4" class="center">
+								<lx-button 
+									flex-item="4"
+									lx-type="fab" 
+									lx-size="s" 
+									lx-color="red" 
+									lx-tooltip="Colgar LLamada" 
+									lx-tooltip-position="bottom"
+									ng-click="$ctrl.hangup()"
+									class="btn-control"
+									ng-class="{
+										'inactive': ($ctrl.state < 4), 
+										'inactive-back': ($ctrl.state < 4)
+									}">
+									<i class="mdi mdi-call-received"></i>
+								</lx-button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
 	<div>
 </div>

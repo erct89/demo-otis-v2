@@ -1,0 +1,106 @@
+div#showcase h1 {
+    position: absolute;
+    z-index: 1;
+    padding: 0.5em;
+    color: white;
+    opacity: 0.5;
+    text-shadow: 5px 5px 5px black;
+}
+
+
+video-call #videocall-wrapper {
+	height: 100%;
+	background: #ffffff;
+}
+
+video-call #videocall-wrapper .header{
+	background: #2098d1;
+	color: #ffffff;
+	padding-bottom: 1.5em; 
+}
+
+video-call #videocall-wrapper .main{
+	height: calc(100% - 24px - 3.5em);
+}
+
+video-call #videocall-wrapper .main > div{
+	height: calc(100% - 0.5em);
+}
+
+video-call #videocall-wrapper .main #controls{
+	height: 3.5em;
+}
+
+video-call #videocall-wrapper .main .inactive{
+	pointer-events: none;
+}
+video-call #videocall-wrapper .main .inactive.inactive-back{
+	background: gray;
+}
+video-call #videocall-wrapper .main .inactive.inactive-color{
+	color: gray;
+}
+video-call #videocall-wrapper .main .inactive.inactive-boder{
+	border-color: gray;
+}
+
+video-call #videocall-wrapper .main .card{
+	height: calc(100% - 0.5em);
+}
+
+video-call audio{
+	width: 100%;
+}
+
+video-call video{
+	background: url('../../images/bgvideo.png');
+	height: 99%;
+	width: 99%;
+}
+
+video-call #videocall-wrapper .main .card{
+	position: relative;
+	margin: 4px;
+}
+
+video-call #videocall-wrapper .main .card-header{
+	background: #d7d7d7;
+	color: #ffffff;
+}
+
+video-call #videocall-wrapper .card-header h2{
+	text-align: center;
+}
+
+video-call #videocall-wrapper .card-header p{
+	font-size: small;
+	font-style: italic;
+}
+
+video-call #videocall-wrapper span.unsupport{
+	text-decoration: line-through;
+	color: #FF5555;
+}
+
+video-call #videocall-wrapper #list-rec .card-main{
+	overflow-y: auto;
+	height: calc(100% - 80px);
+}
+
+video-call .btn-control{
+	position: absolute !important;
+	margin-left: -1em;
+}
+
+.key{
+	font-weight: bold;
+}
+.value{
+	font-weight: normal;
+}
+
+/*Ocultar contenido*/
+video-call .unsupport{
+	filter: grayscale(100%) blur(1px);
+	pointer-events: none;
+}

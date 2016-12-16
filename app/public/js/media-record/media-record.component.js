@@ -2,7 +2,7 @@
 
 angular.module('mediaRecord')
 	.component('mediaRecord',{
-		templateUrl: ['$element','$attrs', function($element,$attrs) {
+		templateUrl: ['$element','$attrs', function($element, $attrs) {
 				$attrs.type = ($attrs.type === 'video' || $attrs.type === 'audio')? $attrs.type: 'default';
 				$element.class += " mr-"+$attrs.type;
 				return  'js/media-record/' + $attrs.type + '-record.template.html';
@@ -108,9 +108,28 @@ angular.module('mediaRecord')
 							}
 						}).then(function(mstream) {
 							self.input = $sce.trustAsResourceUrl(Records.getBlobURL(mstream));
+							mstream.oninactive= function() {console.log("Desactivo")};
 						}).catch(function(error) {
 							console.log(error);
 						});
+				};
+
+				self.playList = function() {
+					if(self.type === 'audio'){
+						for(var i = 0; i < self.recs.length; i++){
+							setTimeout(function(i) {
+								console.log(self.recs);
+								self.recs[i].get()
+									.then(function(r){
+										return r.getUserMedia();
+									}).then(function(mstream){
+										self.input = $sce.trustAsResourceUrl(Records.getBlobURL(mstream));						
+									}).catch(function(error) {
+										console.log(error);
+									});
+							}, 2000 * (i+1), i);
+						}
+					}
 				};
 
 				var changeState = function(index){

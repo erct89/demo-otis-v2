@@ -3,8 +3,10 @@
 angular.module('webrtc')
 	.factory('Dependencies',['DEPENDECIES','Util','$window', function (DEPENDECIES, Util, $window) {
 		var supportDependencies = Util.getExitProperties(DEPENDECIES);
+		var _dependencies = {}; //Almacenamos todas las dependencias que se han ido pidiendo, para no tener que obtener una nueva referencia todo el tiempo.
 		var _window = $window;
 		
+
 		var separateProperty = function(fullNameProperty){
 			var result = ( typeof(fullNameProperty) === 'string' )? fullNameProperty: undefined;
 
@@ -16,10 +18,10 @@ angular.module('webrtc')
 		};
 
 		return {
-			getDependecies: function(){
+			getDependencies: function(){
 				return DEPENDECIES;
 			},
-			getDependeciesSupport: function(){
+			getDependenciesSupport: function(){
 				var result = [];
 				var allDep = DEPENDECIES;
 				var serparateDependency = null;
@@ -41,15 +43,25 @@ angular.module('webrtc')
 
 				return result;
 			},
-			getDependecy: function(fullNameDependency){
+			getDependency: function(fullNameDependency){
 				var result = null;
 				var separateDependency = separateProperty(fullNameDependency);
 
+				if(_dependencies[fullNameDependency]){
+					return _dependencies[fullNameDependency];
+				}
+
 				if(separateDependency){
-					result = Util.getPropertyForFullName(_window,separateDependency);	
+					result = Util.getPropertyForFullName(_window,separateDependency);
+					if(result){
+						_dependencies[fullNameDependency] = result;
+					}	
 				}
 
 				return result;
+			},
+			getAllDependencies: function() {
+				return _dependencies;
 			}
 		};
 	}]);

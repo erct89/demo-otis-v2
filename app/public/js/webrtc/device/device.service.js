@@ -10,7 +10,8 @@ angular.module('webrtc')
 			self.state = states[0];
 			self.spConstraints = Devices.constraints; // Hash de propiedades que son soportadas.
 			self.constraints = {audio: self.spConstraints.audio, video: self.spConstraints.video}; //Establecer las propiedades por defecto.
-			self.userMedia = Dependencies.getDependecy("window.navigator.mediaDevices.getUserMedia");
+			self.userMedia = Dependencies.getDependency("window.navigator.mediaDevices.getUserMedia");
+
 
 			/*
 				checkConstraint(<String>)
