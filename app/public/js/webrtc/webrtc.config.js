@@ -5,6 +5,11 @@ angular.module('webrtc')
 
 angular.module('webrtc')
 	.run(['Util', 'Devices', function(Util, Devices){
+		//Iniciar la libreria de Janus.
+		if(Janus){ 
+			Janus.init({debug:false});
+		}
+		
 		//Obteniedo los diferentes dispositivos y de paso las restricciones.
 		Devices.loadDevices().then(function(devicesInfo){
 			var all_devices = devicesInfo;

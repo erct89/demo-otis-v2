@@ -31,16 +31,19 @@ video-call #videocall-wrapper .main #controls{
 	height: 3.5em;
 }
 
-video-call #videocall-wrapper .main .inactive{
+.inactive{
 	pointer-events: none;
 }
-video-call #videocall-wrapper .main .inactive.inactive-back{
+.inactive.inactive-blur{
+	filter: blur(1px);
+}
+.inactive.inactive-back{
 	background: gray;
 }
-video-call #videocall-wrapper .main .inactive.inactive-color{
+.inactive.inactive-color{
 	color: gray;
 }
-video-call #videocall-wrapper .main .inactive.inactive-boder{
+.inactive.inactive-boder{
 	border-color: gray;
 }
 

@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('webrtc').service('Janus', 
-	['JANUS_SERVER','JANUS_ICE_SERVERS', 'Dependencies', '$rootScope',
-		function(JANUS_SERVER, JANUS_ICE_SERVERS, Dependencies, $rootScope){
+	['JANUS_SERVER','JANUS_ICE_SERVERS', 'Dependencies', 'Util', '$rootScope',
+		function(JANUS_SERVER, JANUS_ICE_SERVERS, Dependencies, Util, $rootScope){
 			const STATES = {
 				'unsupported': 0, '0': 'unsupported',
 				'supported': 1, '1': 'supported',
@@ -19,8 +19,6 @@ angular.module('webrtc').service('Janus',
 			var Adapter = Dependencies.getDependency('window.AdapterJS');
 
 			self.janusSession; 
-			self.pluginName;
-			self.janusPluginHandler;
 			self.state;
 
 			/*
@@ -34,23 +32,21 @@ angular.module('webrtc').service('Janus',
 					if ( self.state === STATES.unsupported ) { //Solo se cambia el estado cuando es STATES.unsupported.
 						_stateChange(STATES.supported);
 					}	
-					//state = STATES.supported; //DELETE*
 					return true;
 				}else{
-					if ( self.state != STATES.unsupported ) { //Por si se pierde soporte en tiempo de ejecucion.
-						_stateChange(STATES.unsupported);
-					}
+					_stateChange(STATES.unsupported);
+
 					return false;
 				}
 			};
 
 			/*
-				_initJanus()
+				loadJanus()
 					- Description: Realiza la inicializacion de la libreria Janus.
 					< return: <Promise> es una forma facil de poder controlar mejor cuando
 					inicia la libreria de Janus.
 			*/
-			var _initJanus = function () {
+			var loadJanus = function () {
 				return new Promise( function (resolve, reject) {
 					if (_isSupport()) {
 						if (Janus.initDone){ //No hay por que iniciar si ha esta iniciado.
@@ -60,7 +56,7 @@ angular.module('webrtc').service('Janus',
 							Janus.init({debub: true, callback: function(){
 								console.log("Janus - acaba de ser iniciado");
 								_stateChange(STATES.disconnected);
-								//state = STATES.disconnected;
+
 								return resolve();
 							}});
 						}
@@ -78,33 +74,33 @@ angular.module('webrtc').service('Janus',
 			*/
 			var _createSession = function ( servers, iceServers ) {
 				return new Promise ( function( resolve, reject ) {
-					_initJanus().then( function() {
+					loadJanus().then( function() {
 						if(!self.janusSession){
 							self.janusSession = new Janus({ 
-								server: 'https://janus.conf.meetecho.com/janus',//JANUS_SERVER, 
-								//iceServers: JANUS_ICE_SERVERS,
+								server: JANUS_SERVER, //'https://janus.conf.meetecho.com/janus', 
+								iceServers: JANUS_ICE_SERVERS,
 								success: function () { 
 									console.log('Creada la session en Janus');
 									_stateChange(STATES.connected);
 
-									self.janusSession.plugins = {};
+									self.janusSession.pluginHandler = null;
 									$rootScope.$broadcast('onNewSessionJanus', null);
 									resolve(); 
 								}, error: function ( error ) { 
 									console.log('Error al crear session en Janus');
 
 									$rootScope.$broadcast('onErrorJanus', error);
-									reject(error); },
-								destroyed: function() { 
+									reject(error); 
+								}, destroyed: function() { 
 									console.log('Destruida la session con Janus');
-
 									self.janusSession = null;
 									_stateChange(STATES.disconnected);
-									///*DELETE*/state = STATES.disconnected;
+
 									$rootScope.$broadcast('onDestroySessionJanus', null);
 									resolve({ message: "The session has been destroyed" }); 
 								}
 							});
+							console.log(self.janusSession);
 						} else{
 							console.log('Ya existe una session');
 							_stateChange(STATES.connected);
@@ -157,15 +153,28 @@ angular.module('webrtc').service('Janus',
 							plugin: pluginName,
 							success: function(pluginHandler){ 
 								console.log('Plugin handler success');
-
 								_stateChange(STATES.attached);
 								
-								$rootScope.$broadcast( 'onAttachPluginJanus', pluginHandler.id );
-								
-								//self.janusPluginHandler = pluginHandler;
+								pluginHandler.name  = pluginName;
+								pluginHandler.uses = {};
+								pluginHandler.use = function(callback, target, value){
+									callback = ( callback instanceof Function )? callback: function (){}; 
+									target = ( typeof(target) === 'string' )? target: "full";
+									pluginHandler.uses[target] = pluginHandler.uses[target] || [];
+									pluginHandler.uses[target].push({callback: callback, value: value});
+								};
+
+								pluginHandler.use(function(msg, jsep){ 
+									console.log("{ message: ");
+									console.log(msg);
+									console.log("Jsep: ");
+									console.log(jsep);
+									console.log("}")
+								});
+
 								self.janusSession.pluginHandler = pluginHandler
-								self.pluginName = pluginName;
-								
+
+								$rootScope.$broadcast( 'onAttachPluginJanus', pluginHandler);
 								resolve(pluginHandler); 
 							}, error: function(error){ 
 								console.log('Plugin handler error');
@@ -178,20 +187,56 @@ angular.module('webrtc').service('Janus',
 								console.log("consentDialog: "); 
 								console.log(on); 
 							}, onmessage: function (msg, jsep) {
-								//Platearlo como una  
-								console.log("onMessage: "); 
-								console.log(" Message -> " ); 
-								console.log(msg); 
-								console.log(" JSEP -> "); 
-								console.log(jsep); 
+								//Platearlo como un proceso vertical, donde hay 4 tipo de peticines.
+								// - Todos los parametros "full",
+								// - Solo o "msg" ("message") o "jsep" ("jsep").
+								// - Propieda de msg ex: "result.list" -> "msg.result.list"
+								for(var use of self.janusSession.pluginHandler.uses["full"]){
+									use.callback(msg, jsep);
+								}
+								if(msg){
+									for(var use of self.janusSession.pluginHandler.uses["message"]){
+										use.callback(msg);
+									}
+								}
+								if(jsep){
+									for(var use of self.janusSession.pluginHandler.uses["jsep"]){
+										use.callback(jsep);
+									}
+								}
+								for(var target in self.janusSession.pluginHandler.uses){
+									var property = Util.getPropertyForFullName(msg,target.split('.'));
+									if(property){
+										if(self.janusSession.pluginHandler.uses[target].value === undefined){
+											
+										}
+									}
+								}
+
+								for(var target in self.janusSession.pluginHandler.uses){
+									if(target === "full"){
+										for(var callback of self.janusSession.pluginHandler.uses[target]){
+											callback(msg, jsep);
+										}
+									}else if( target === "message"){
+										for(var callback of self.janusSession.pluginHandler.uses[target]){
+											callback(msg);
+										}
+									}else if( target === "jsep" ){
+										for(var callback of self.janusSession.pluginHandler.uses[target]){
+											callback(jsep);
+										}
+									} else{
+										for(var callback of self.janusSession.pluginHandler.uses[target]){
+											var property = Util.getPropertyForFullName(msg,target.split('.'));
+											callback(msg, jsep, property);
+										}
+									}
+								}
 								
 								//Se ha recibido resultado.
 								if(msg.result) {
 									if( msg.result["list"] ) {
-										console.log("Result List:");
-										msg.result.list.forEach(function(item) {
-											console.log(item);
-										});
 									} else if( msg.result["event"] ) {
 										if(msg.result.event === 'registered') {
 											console.log("User " + msg.result.username + " registered.");
@@ -200,87 +245,42 @@ angular.module('webrtc').service('Janus',
 											console.log("Wait ");
 										} else if(msg.result.event === 'incomingcall') {
 											console.log("Incoming call from " + msg.result.username + "!");
-											/*Janus.log("Incoming call from " + result["username"] + "!");
-											$('#peer').val(result["username"]).attr('disabled');
-											yourusername = result["username"];
-											// TODO Enable buttons to answer
-											videocall.createAnswer(
-												{
-													jsep: jsep,
-													// No media provided: by default, it's sendrecv for audio and video
-													media: { data: true },	// Let's negotiate data channels as well
-													success: function(jsep) {
-														Janus.debug("Got SDP!");
-														Janus.debug(jsep);
-														var body = { "request": "accept" };
-														videocall.send({"message": body, "jsep": jsep});
-														$('#peer').attr('disabled', true);
-														$('#call').removeAttr('disabled').html('Hangup')
-															.removeClass("btn-success").addClass("btn-danger")
-															.unbind('click').click(doHangup);
-													},
-													error: function(error) {
-														Janus.error("WebRTC error:", error);
-														bootbox.alert("WebRTC error... " + JSON.stringify(error));
-													}
-												});*/
+											self.janusSession.pluginHandler.createAnswer({
+												jsep: jsep,
+												media: { 
+													audio: true, 
+													video: false, 
+													data: true 
+												}, success: function(jsep) {
+													self.janusSession.pluginHandler.send({
+														"message": {"request": "accept"}, 
+														"jsep": jsep}
+													);
+												},
+												error: function(error) {
+													console.log("Webrct error: ");
+													console.log(error);
+												}
+											});
 										} else if(msg.result.event === 'accepted') {
 											console.log("Offerta acceptada por: " + msg.result.username);
 											if(jsep !== null && jsep !== undefined){
 												self.janusSession.pluginHandler.handleRemoteJsep({jsep: jsep});
 											}
 										} else if(event === 'hangup') {
-											/*Janus.log("Call hung up by " + result["username"] + " (" + result["reason"] + ")!");
-											// TODO Reset status
-											videocall.hangup();
-											if(spinner !== null && spinner !== undefined)
-												spinner.stop();
-											$('#waitingvideo').remove();
-											$('#videos').hide();
-											$('#peer').removeAttr('disabled').val('');
-											$('#call').removeAttr('disabled').html('Call')
-												.removeClass("btn-danger").addClass("btn-success")
-												.unbind('click').click(doCall);
-											$('#toggleaudio').attr('disabled', true);
-											$('#togglevideo').attr('disabled', true);
-											$('#bitrate').attr('disabled', true);
-											$('#curbitrate').hide();
-											$('#curres').hide();*/
+											console.log("Call hangup by " + msg.result.username + "(" + msg.result.reason + ")!");
+											self.janusSession.pluginHandler.hangup();
 										}
 									}
 								} else {
-									// FIXME Error?
-									/*var error = msg["error"];
-									bootbox.alert(error);
-									if(error.indexOf("already taken") > 0) {
-										// FIXME Use status codes...
-										$('#username').removeAttr('disabled').val("");
-										$('#register').removeAttr('disabled').unbind('click').click(registerUsername);
-									}
-									// TODO Reset status
-									videocall.hangup();
-									if(spinner !== null && spinner !== undefined)
-										spinner.stop();
-									$('#waitingvideo').remove();
-									$('#videos').hide();
-									$('#peer').removeAttr('disabled').val('');
-									$('#call').removeAttr('disabled').html('Call')
-										.removeClass("btn-danger").addClass("btn-success")
-										.unbind('click').click(doCall);
-									$('#toggleaudio').attr('disabled', true);
-									$('#togglevideo').attr('disabled', true);
-									$('#bitrate').attr('disabled', true);
-									$('#curbitrate').hide();
-									$('#curres').hide();
-									if(bitrateTimer !== null && bitrateTimer !== null) 
-										clearInterval(bitrateTimer);
-									bitrateTimer = null;*/
+									self.janusSession.pluginHandler.hangup();									
 								}
 							}, onlocalstream: function(mStream) { 
 								console.log("onLocalStream: "); 
 								$rootScope.$broadcast('onLocalStreamPluginJanus', mStream); 
 							}, onremotestream: function(mStream) { 
 								console.log("onRemoteStream: "); 
+								console.log(mStream);
 								$rootScope.$broadcast('onRemoteStreamPluginJanus', mStream); 
 							}, ondataopen: function (x) { 
 								console.log("onDataOpen: "); 

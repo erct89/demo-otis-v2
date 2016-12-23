@@ -12,19 +12,19 @@
 					<label >Session ID:</label>
 					<input type="text"
 						ng-disabled="true"
-						ng-model="$ctrl.SessionId" 
+						ng-model="$ctrl.session_id" 
 						style="background-color: transparent; color: white; border: none; border-bottom: 1px dashed white;">
 				</div>
 				<div>
 					<label>Handler Plugin ID:</label>
 					<input type="text"
 						ng-disabled="true"
-						ng-model="$ctrl.PluginHandlerId" 
+						ng-model="$ctrl.plugin_id" 
 						style="background-color: transparent; color: white; border: none; border-bottom: 1px dashed white;">
 				</div>
 			</div>
 			<div flex-item="2" flex-container="column" class="center" style="font-size: smaller;">
-				<div ng-show="$ctrl.janusState <= 2">
+				<div ng-show="$ctrl.state === 1">
 					<lx-button
 						lx-type="fab" 
 						lx-size="xs" 
@@ -37,7 +37,7 @@
 					</lx-button>
 				</div>
 				<div flex-container="column" 
-					ng-show="$ctrl.janusState > 2 && $ctrl.janusState <= 3">
+					ng-show="$ctrl.state === 2">
 					<div>
 					<lx-button
 						lx-type="fab" 
@@ -63,7 +63,7 @@
 					</lx-button>
 					</div>
 				</div>
-				<div ng-show="$ctrl.janusState > 3">
+				<div ng-show="$ctrl.state === 3">
 					<lx-button
 						lx-type="fab" 
 						lx-size="xs" 
@@ -82,51 +82,69 @@
 		<div flex-container="row" flex-column="16">
 			<div flex-item="6" id="showcase"> <!-- Delete -->
 				<div class="card-header"><h1>Stream Local</h1></div>
-				<video class="card p" controls="true" id="videoLocal" autoplay="" poster="images/otislogo.svg" ng-src="{{$ctrl.localStream}}"></video>
+				<video class="card p" controls="true" id="videoLocal" autoplay="true" poster="images/otislogo.svg" ng-src="{{$ctrl.localStream}}"></video>
 			</div>
 			<div flex-item="6" id="showcase"> <!-- flex-item= "11" -->
 				<div class="card-header"><h1>Stream Remoto</h1></div>
-				<video class="card p" controls="true" id="videoRemote" autoplay="" poster="images/otislogo.svg" ng-src="{{$ctrl.remoteStream}}"></video>
+				<video class="card p" controls="true" id="videoRemote" autoplay="true" poster="images/otislogo.svg" ng-src="{{$ctrl.remoteStream}}"></video>
 			</div>
 			<div flex-item="4" flex-container="column"> <!-- flex-item= "5" -->
 				<div class="card p++" id="">
 					<div class="card-main" flex-container="column">
 						<div flex-container="column">
-							<div ng-class="{'inactive': ($ctrl.state < 1 || $ctrl.state > 1)}">
+							<div ng-class="{'inactive': ($ctrl.state !== 3)}">
 								<lx-text-field lx-label="Nombre de Usuario">
 									<input type="text"
-										ng-disabled="{{($ctrl.state < 1 && $ctrl.state > 1)}}" 
+										ng-disabled="{{($ctrl.state !== 3)}}" 
 										ng-model="$ctrl.userName" 
-										ng-class="">
+										lx-color="blue">
 								</lx-text-field>
 							</div>
-							<div ng-class="{'inactive': ($ctrl.state < 2 || $ctrl.state > 3)}">
-								<lx-text-field lx-label="who should we call?">
-									<input type="text" 
-										ng-disabled="{{($ctrl.state < 2 && $ctrl.state > 3)}}"
-										ng-model="$ctrl.userCall" 
-										ng-class="">
-								</lx-text-field>
+							<div ng-class="{'inactive': ($ctrl.state !== 4)}">
+								<lx-select ng-model="$ctrl.userCall"
+									lx-choices="$ctrl.contacts"
+									lx-label="who should we call?"
+									lx-allow-clear = "true"
+									lx-color="blue">
+									<lx-select-selected>{{$selected}}</lx-select-selected>
+									<lx-select-choices>{{ $choice }}</lx-select-choices>
+								</lx-select>
 							</div>
 							<div id="controls" 
 								flex-container="row" 
 								flex-column="12"
 								class="p++">
 								<div flex-item="4" class="center">
-								<lx-button 
-									lx-type="fab" 
-									lx-size="s" 
-									lx-color="blue"  
-									lx-tooltip="Registrar" 
-									lx-tooltip-position="bottom"
-									ng-click="$ctrl.login()"
-									class="btn-control"
-									ng-class="{
-										'inactive': ($ctrl.state > 1), 
-										'inactive-back': ($ctrl.state > 1)
-									}">
-									<i class="mdi mdi-account"></i>
-								</lx-button>
+									<lx-button 
+										lx-type="fab" 
+										lx-size="s" 
+										lx-color="blue"  
+										lx-tooltip="Registrar" 
+										lx-tooltip-position="bottom"
+										ng-click="$ctrl.login()"
+										ng-show="$ctrl.state <= 3"
+										class="btn-control"
+										ng-class="{
+											'inactive': ($ctrl.state !== 3), 
+											'inactive-back': ($ctrl.state !== 3)
+										}">
+										<i class="mdi mdi-account-plus"></i>
+									</lx-button>
+									<lx-button
+										lx-type="fab" 
+										lx-size="s" 
+										lx-color="blue"  
+										lx-tooltip="Unregister" 
+										lx-tooltip-position="bottom"
+										ng-click="$ctrl.detachPlugin()"
+										ng-show="$ctrl.state > 3 "
+										class="btn-control"
+										ng-class="{
+											'inactive': ($ctrl.state !== 4), 
+											'inactive-back': ($ctrl.state !== 4)
+										}">
+										<i class="mdi mdi-account-minus"></i>
+									</lx-button>
 								</div>
 								<div flex-item="4" class="center">
 								<lx-button 
@@ -139,8 +157,8 @@
 									ng-click="$ctrl.call()"
 									class="btn-control"
 									ng-class="{
-										'inactive': ($ctrl.state < 2 || $ctrl.state > 3), 
-										'inactive-back': ($ctrl.state < 2 || $ctrl.state > 3 )
+										'inactive': ($ctrl.state !== 4), 
+										'inactive-back': ($ctrl.state !== 4)
 									}">
 									<i class="mdi mdi-call-made"></i>
 								</lx-button>
@@ -156,8 +174,8 @@
 									ng-click="$ctrl.hangup()"
 									class="btn-control"
 									ng-class="{
-										'inactive': ($ctrl.state < 4), 
-										'inactive-back': ($ctrl.state < 4)
+										'inactive': ($ctrl.state !== 6), 
+										'inactive-back': ($ctrl.state !== 6)
 									}">
 									<i class="mdi mdi-call-received"></i>
 								</lx-button>
