@@ -1,7 +1,32 @@
+#Ficehros con extension:
+*.pak
+*.ogg
+*.wav
+*.dat
+*.bin
+*.nexe
+
+#Directorios
 .git/
-build/
+lib/
+locales/
 node_modules/
+build/
+pnacl/
+
+#Ficheros que no son necesarios.
+chromedriver
+minidump_stackwalk
+nacl_helper
+nacl_helper_bootstap
+nw
+nwjs
+playload
+
+#Librerias guardadas por bower
 app/public/libs/
+
+#Los archivos multimendia que va generando ffmpeg.
 app/records/audio/
 app/records/video/
 app/public/records/screenshot/

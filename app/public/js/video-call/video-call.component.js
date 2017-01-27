@@ -3,23 +3,28 @@
 angular.module('videoCall')
 	.component('videoCall',{
 		templateUrl: 'js/video-call/video-call.template.html',
-		controller: ['JANUS_SERVER', 'JANUS_ICE_SERVERS', 'Dependencies', 'Plataform', 'Records', 'Device', '$sce', '$scope', 
-			function(JANUS_SERVER, JANUS_ICE_SERVERS, Dependencies, Plataform, Records, Device, $sce, $scope){ 
+		controller: [ 'JANUS_SERVER', 'JANUS_ICE_SERVERS', 'Dependencies', 'Plataform', 'Records', 'Device', '$sce', '$scope', 
+			function( JANUS_SERVER, JANUS_ICE_SERVERS, Dependencies, Plataform, Records, Device, $sce, $scope){ 
+				
 				const STATES = { "unsupport": 0, "0": "unsupport", "unconected": 1, "1": "unconected", 
 						"unplugging": 2, "2": "unplugging",	"unregistered": 3, "3": "unregistered",
 						"available": 4, "4": "available", "calling": 5, "5": "calling",
-						"speking": 6, "6": "speking", "engaged": 7, "7": "engaged"};
+						"speaking": 6, "6": "speaking", "engaged": 7, "7": "engaged"};
 
     			const PLUGIN = 'janus.plugin.videocall';
+    			
     			const MESSAGES_PLUGIN = {
-    				"list": { "message": { "request": "list" }}, 
-    				"register": {},
-    				"accept": {"message":{ "request":"accept" }, "jsep":null}
+    				"list": { "message": { "request": "list" } }, 
+    				"call": { "message": { "request": "call", "username": null }, "jsep": null },
+    				"accept": { "message":{ "request":"accept" }, "jsep":null },
+    				"hangup": { "message":{ "request":"hangup"} }
     			};
 
 				var self = this;
 				var Janus = Dependencies.getDependency('window.Janus');
 				var janus_session = null;
+				var inputStream = null;
+				var outputStream = null;
 				self.userName = "Otis";
 				self.userCall = "";
 				self.contacts;
@@ -28,11 +33,12 @@ angular.module('videoCall')
 				self.remoteStream;
 				self.localStream;
 
+
 				//1.- Comprobar Soporte.
 				self.state = Janus.initDone ? STATES.unconected : STATES.unsupport; 
 				//self.janusState = Janus.getState();
 				
-							//Funciones|Metodos pirvados
+				//Funciones|Metodos pirvados
 				/*
 					_stateChange(newState)
 						- Description: Se encarga de lanzar un evento onStateChangeJanus cada vez 
@@ -130,17 +136,17 @@ angular.module('videoCall')
 
 										if(message.result){
 											if(message.result.list){
-												self.userCall = null;
 												self.contacts = message.result.list.filter(function(item){ return item != self.userName; });
-												setTimeout(function() { janus_session.plugin.send(MESSAGES_PLUGIN.list) }, 5000);
+												setTimeout(function() { if(janus_session.plugin) {janus_session.plugin.send(MESSAGES_PLUGIN.list); } }, 5000);
 
 												console.log("Trace message: List ");
-												console.log(self.contacts);
-												console.log(message.result.list);
+												//console.log(self.contacts);
+												//console.log(message.result.list);
 											}else if(message.result.event){
 												console.log("Trace message: Event ");
 												switch(message.result.event){
 													case 'registered':
+													//Se ha realizado el registro con el plugin.
 														self.contacts = self.userCall = null;
 														janus_session.plugin.send(MESSAGES_PLUGIN.list);
 														
@@ -148,35 +154,54 @@ angular.module('videoCall')
 														console.log("Trace message: event registered");
 														break;
 													case 'calling':
+													//Estamos ocupados llamando a otro usuario.
 														_stateChange(STATES.calling);
 														console.log("Trace message: event calling");
 														break;
 													case 'incomingcall':
-														self.userCall = message.result.username || 'Anonymous';
-														janus_session.plugin.createAnswer({
-															jsep: jsep,
-															media: { audio: true, 
-																video:false,
-																data: true},
-															success: function(jsep) {
-																var request = MESSAGES_PLUGIN.accept.jsep = jsep; 
-																janus_session.plugin.send(request);
-																_stateChange(STATES.speking);
+													//Alguien nos esta llamando.
+														Records.playGroup('audio').then(function(mediaStream){
+															console.log(mediaStream);
+															self.userCall = message.result.username || 'Anonymous';
+															janus_session.plugin.createAnswer({
+																jsep: jsep,
+																media: { 
+																	audio:true, 
+																	videoSend: false, 
+																	videoRecv: true, 
+																	data: true
+																},
+																stream: mediaStream
+																, success: function(jsep) {														
+																	let request = MESSAGES_PLUGIN.accept
+																	request.jsep = jsep;
+																	janus_session.plugin.send(request);
+																	_stateChange(STATES.speaking);
 
-																console.log("Trace message: event incomingcall answer accept.");
-															}, error: function(error) {
-																self.localStream = self.remoteStream = null
-																self.userCall = null;
-																_stateChange(STATES.available);
-																
-																console.log("Error message: event incomingcall answer error");
-																console.log(error);
-															}
+																	console.log("Trace message: event incomingcall answer accept.");
+																}, error: function(error) {
+																	closeMediaStream(inputStream);
+																	closeMediaStream(outputStream);
+																	self.localStream = self.remoteStream = "";
+																	self.userCall = null;
+																	_stateChange(STATES.available);
+																	
+																	console.log("Error message: event incomingcall answer error");
+																	console.log(error);
+																}
+															});
+
+
+															self.localStream = $sce.trustAsResourceUrl(Records.getBlobURL(mediaStream));
+														}).catch( function(error) {
+															console.log(error);
 														});
 														
 														console.log("Trace message: event incomingcall");
 														break;
 													case 'accepted':
+													//La llamada que se realizo ha sido acceptada.
+														/*Codigo antiguo.
 														self.username = message.result.username || 'Anonymous';
 														if(jsep){
 															janus_session.plugin.handleRemoteJsep({jsep: jsep});
@@ -184,16 +209,27 @@ angular.module('videoCall')
 														_stateChange(STATES.speking);
 
 														console.log("Trace message: event accepted.");
+														*/
+														if(jsep){
+															janus_session.plugin.handleRemoteJsep({jsep: jsep});
+														}
+														_stateChange(STATES.speaking);
+
+														console.log("Trace message: event accepted");
 														break;
 													case 'hangup':
-														self.contacts = self.userName = null;
-														self.localStream = self.remoteStream = null;
-														janus_session.plugin.hangup();
+													//Se ha desacoplado el plugin handler.
+														self.contacts = self.userCall = null;
+														self.localStream = self.remoteStream = "";
+														closeMediaStream(inputStream);
+														closeMediaStream(outputStream);
+
 														_stateChange(STATES.available);
 
 														console.log("Trace message: event hangup.");
 														break;
 													default:
+													//Se envian mensages por defecto.
 														console.log("Trace message: event " +message.result.event+ " unsuported.");
 														break;
 												}
@@ -207,11 +243,13 @@ angular.module('videoCall')
 											}
 										}
 									}, onlocalstream: function(mediaStream){
-										self.localStream = mediaStream;
+										outputStream = mediaStream;
+										self.localStream = $sce.trustAsResourceUrl(Records.getBlobURL(outputStream));
 										console.log("Attach onlocalstream:");
 										console.log(arguments);
 									}, onremotestream: function(mediaStream){
-										self.remoteStream = mediaStream;
+										inputStream = mediaStream;
+										self.remoteStream = $sce.trustAsResourceUrl(Records.getBlobURL(inputStream));
 										console.log("Attach onremotestream:");
 										console.log(arguments);
 									}, ondataopen: function(args){
@@ -223,7 +261,9 @@ angular.module('videoCall')
 									}, oncleanup: function(args){
 										self.plugin_id = null;
 										self.userCall = null;
-										self.localStream = self.remoteStream = null;
+										self.localStream = self.remoteStream = "";
+										closeMediaStream(inputStream);
+										closeMediaStream(outputStream);
 										delete janus_session.plugin;
 										_stateChange(STATES.unplugging);
 
@@ -278,7 +318,7 @@ angular.module('videoCall')
 				}
 
 
-				//
+				//Iniciar el registro del usuario con el plugin.
 				self.login = function(){
 					var message = { "message": {"request": "register", "username": self.userName} };
 					
@@ -301,118 +341,104 @@ angular.module('videoCall')
 					}
 					console.log("}");
 				};
-				/*
+				
+
+				/*Manejador para llamar*/
 				self.call = function() {
 					if(self.userCall.length > 0){
-						if(self.state > STATES.unregistered && self.state < STATES.engaged){
+						if(self.state > STATES.unregistered && self.state < STATES.calling){
 							//Esto lo puedo mover al servicio.
-							Janus.getPluginHandler().createOffer({
-								"media": true,
-								"success": function(jsep) {
-									var message = {
-										"message": {
-											"request": "call",
-											"username": self.userCall,
-										}, "jsep": jsep
-									};
+							if (janus_session) {
+								if (janus_session.plugin && janus_session.plugin.createOffer) {
+									Records.playGroup('audio').then(function(mediaStream){
+										console.log("CREATE OFFER: MEDIASTREAM OBTENIDO");
+										console.log(mediaStream.constructor.name);
+										janus_session.plugin.createOffer({ 
+											"media": {
+												audio: true,
+												videoSend: false,
+												videoRecv: true,
+												data: true
+											}, 
+											"stream": mediaStream,
+											"success": function(jsep){
+												_stateChange(STATES.calling);
+												MESSAGES_PLUGIN.call.message.username = self.userCall;
+												MESSAGES_PLUGIN.call.jsep = jsep;
+												janus_session.plugin.send(MESSAGES_PLUGIN.call);
+											}, "error": function(error) {
+												console.log("[Call] Plugin createOffer error: ");
+												console.log(error);
+												self.userCall = '';
+											}
+										});
 
-									Janus.getPluginHandler().send(message);
-								},
-								"error": function(error) {
-									console.log("Plugin createOffer error:");
-									console.log(error);
-									self.userCall = '';
-								} 
-							});
-							//self.state = STATES.engaged;
+										self.localStream = $sce.trustAsResourceUrl(Records.getBlobURL(mediaStream));
+									
+									}).catch( function(error) {
+										console.log("CREATE OFFER ERROR!!!!!");
+										console.log(error);
+									});
+								} else {
+									console.log("[Call] Dont exit plugin handler.");
+									_stateChange(STATES.unplugging);
+								}
+							} else {
+								console.log("[Call] Dont exit session with janus");
+								_stateChange(STATES.unconected);
+							}
 						}
 					}
 				};
+
+
+				/*Manejador para el colgado de llamadas.*/
 				self.hangup = function() {
-					if(self.state === STATES.engaged){
-						if(Janus.getPluginHandler){
-							Janus.getPluginHandler().send({"message": hangup});
-							Janus.getPluginHandler().hangup();
+					if(self.state === STATES.speaking){
+						if(janus_session){
+							if(janus_session.plugin && janus_session.plugin.send){
+								janus_session.plugin.send(MESSAGES_PLUGIN.hangup);
+								janus_session.plugin.detach();
+								_stateChange(STATES.unplugging);
+							}else{
+								_stateChange(STATES.unconected);
+							}
+						}else{
+							_stateChange(STATES.unconected);
 						}
 					}
-				};*/
+				};
 
-				//Envia un mensaje al servidor Janus para recuperar los usuarios
-				//conectados al plugin.
-				/*self.listUsers = function(){
-					var message = {"message": {"request": "list"}};
+
+				//Realiza una peticion "List"
+				var listUsers = function(){
 					if( self.state === STATES.registered ){
 						if(Janus.getPluginHandler){
-							Janus.getPluginHandler().send(message);
+							Janus.getPluginHandler().send(MESSAGES_PLUGIN.list);
 						}	
 					}
-				};*/
+				};
 
+				//Realiza el cerrado de un mediaStream
+				/*var closeMediaStream = function (mediaStream) {
+					mediaStream = mediaStream || {}; //Evito los problemas cuando el argumento es nulo.
+					if(mediaStream.getTracks){
+						mediaStream.getTracks().forEach(function (mStreamTrack) {
+							mStreamTrack.stop();
+						});
+					}
+				}*/
 
-			
-
-
-			/*
-			//Eventos del Servicio Janus
-				//Envento: que captura los errores que surgen en el plugin Janus.
-				$scope.$on('onErrorJanus',function(event,error) {
-					console.log("event: " + event.name );
-					console.log(error);
-				});
-
-
-				//Evento: que indica cuando cambia de estado el servicio.
-				$scope.$on('onStateChangeJanus', function(event, janusState) {
-					console.log("event: " + event.name );
-					console.log('Cambio de estado en Janus > ' + janusState.value);
-					self.janusState = janusState.state;
-				});
-
-
-				//Eventos: capturados cuando se inicia, destruye o session una session con Janus.
-				$scope.$on('onNewSessionJanus',function(event) {
-					console.log("event: " + event.name );
-					self.SessionId = Janus.getSession().getSessionId();
-				});
-				$scope.$on('onDestroySessionJanus', function(event){
-					console.log("event: " + event.name );
-					_stateChange(STATES.unregistered);
-					self.SessionId = '';	
-				});
-
-				//Eventos: Estos eventos son lanzados por el plugin de janus.
-				// - Conectado al plugin.
-				$scope.$on('onAttachPluginJanus',function(event, handlerPlugin) {
-					console.log("event: " + event.name );
-					self.PluginHandlerId = handlerPlugin.id;
-
-					handlerPlugin.use('result.list', function(contacts){
-						contacts = Array.isArray(contacts) ? contacts: [];
-						self.contacts = contacts;
-
-						for(let contact in self.contacts){
-							if(self.contacts[contact] === self.userName){
-								self.contacts.splice(contact,1);
-							}
+				//Realiza el cerrado de un array de mediaStreams
+				var closeMediaStream = function (mediaStreams) {
+					mediaStreams = Array.isArray(mediaStreams)? mediaStreams: [];
+					mediaStreams.forEach(function(mediaStream){
+						if(mediaStream.getTracks){
+							mediaStream.getTracks().forEach(function(mStreamTrack){
+								mStreamTrack.stop();
+							});
 						}
 					});
-				});
-				// - Desconectado del plugin.
-				$scope.$on('onDetachPluginJanus',function(event) {
-					console.log("event: " + event.name );
-					self.PluginHandlerId = '';
-					self.remoteStream = '';
-					self.localStream = '';
-				});
-				// - Se obtine un mediaStream remoto.
-				$scope.$on('onRemoteStreamPluginJanus', function(event, mStream) {
-					console.log("event: " + event.name );
-					self.remoteStream = $sce.trustAsResourceUrl(Records.getBlobURL(mStream));
-				});
-				// - Se obtine un mediaStream local.
-				$scope.$on('onLocalStreamPluginJanus', function(event, mStream) {
-					console.log("event: " + event.name );
-					self.localStream = $sce.trustAsResourceUrl(Records.getBlobURL(mStream));
-				});*/
+				}
 			}]
 		});

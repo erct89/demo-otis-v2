@@ -55,7 +55,7 @@ angular.module('features').component('features',{
 			//Propiedades publicas.
 			self.os = Plataform.getOS();
 			self.browser = Plataform.getBrowser();
-			self.mimeType = Plataform.getMineType();
+			self.mimeType = Plataform.getMimeType();
 			self.languages = Plataform.getLanguages();
 			self.screen =  Plataform.getScreen();
 			self.dependencies = loadDependencies();

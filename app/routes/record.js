@@ -4,10 +4,11 @@ const ffmpeg = require('fluent-ffmpeg');
 
 let record = {};
 record.files = null; //Variable que agiliza el servidor.
-record.pathFile = 'app\\public\\records\\';
-record.pathVideo =  record.pathFile +'video\\';
-record.pathScreen =  record.pathFile + 'screenshot\\';
-record.pathAudio =  record.pathFile +'audio\\';
+record.pathFile = 'app/public/records/';
+record.pathVideo =  record.pathFile + 'video/';
+record.pathScreen =  record.pathFile + 'screenshot/';
+record.pathAudio =  record.pathFile + 'audio/';
+record.pathTemp = 'temp/';
 
 /*
 	record.getRecords(req, res, next, type){
@@ -108,7 +109,7 @@ record.list = function(req, res){
 	}
 */
 record.get = function(req, res, next) {
-	let pathfile = record.pathFile + req.params.type + '\\' + req.file;
+	let pathfile = record.pathFile + req.params.type + '/' + req.file;
 
 	readFilesPromise(pathfile, {encoding:'Base64'})
 		.then( data => {
@@ -158,9 +159,11 @@ record.postVideo = function(req, res, next){
 			buffer = Buffer.from(blob64,'Base64');
 			command = ffmpeg(record.pathVideo + `${name[2]}.webm` )
 				.fps(30)
+				.audioChannels(2)
 				.output(record.pathScreen + `${name[2]}-%06d.png`)
 				.outputOptions('-r 30')
 				.output(record.pathAudio + `${name[2]}.ogg`)
+				.outputOptions('-vn')
 				.on('error', error => {
 					next(error);
 				}).on('end', () => {
@@ -216,22 +219,25 @@ record.postAudio = function(req, res, next){
 	let blob64 = req.body.data.blob64;
 	let pattern = /^(audio)_(\d{13}).(opus|ogg)$/;
 	let name = req.body.data.name.match(pattern);
-	let pathfile = record.pathAudio + 'audio\\' , buffer = null; command = null;
+	let pathfile = record.pathAudio + 'audio/' , buffer = null; command = null;
 
 	if(blob64){
 		if(name){
 			buffer = Buffer.from(blob64,'Base64');
-			command = ffmpeg(record.pathAudio + name[0]).on('error', error => {
-				next(error);
-			}).on('end', () => {
-				deleteFilesPromise(record.pathAudio + name[0])
-					.then(() => {
-						record.files.audio.push(`${name[2]}.ogg`); 
-						res.json({name: `${name[2]}.ogg` });
-					}).catch( error => {
-						next(error);
-					});
-			});
+			command = ffmpeg(record.pathAudio + name[0])
+				.audioChannels(2)
+				.outputOptions('-vn')
+				.on('error', error => {
+					next(error);
+				}).on('end', () => {
+					deleteFilesPromise(record.pathAudio + name[0])
+						.then(() => {
+							record.files.audio.push(`${name[2]}.ogg`); 
+							res.json({name: `${name[2]}.ogg` });
+						}).catch( error => {
+							next(error);
+						});
+				});
 			if(buffer instanceof Buffer){
 				fs.writeFile(record.pathAudio + req.body.data.name , buffer, error => {
 					if(error){
@@ -263,7 +269,7 @@ record.postAudio = function(req, res, next){
 	}
 */
 record.delete =  function(req, res, next){
-	let pathfile = record.pathFile + req.params.type + '\\' + req.file;
+	let pathfile = record.pathFile + req.params.type + '/' + req.file;
 
 	deleteFilesPromise(pathfile)
 		.then(() => {
@@ -275,6 +281,46 @@ record.delete =  function(req, res, next){
 			console.log(error);
 			next(error);
 		});
+};
+
+
+/*
+	record.concat = function(req, res, next){
+		- Description: Atiende a la peticion Http GET que apunta a "/concat/type" y que 
+		realiza la concatenacion de los ficheros que actualmente hay guardados y se 
+		concatenan en uno llamado concat.ogg of concat.webm.
+	}
+*/
+
+record.concat = function(req, res, next) {
+	if(req.params.type === 'audio'){
+		record.concatAudio(req,res,next);
+	}else if(req.params.type === 'video'){
+		res.json({message: "Feature not available."});
+	}else{
+		next(new Error(`The type "${req.params.type}" is a recording not accepted`));
+	}
+}
+
+record.concatAudio = function(req, res, next) {
+	console.log("Concatenando Audios");
+	if(record.files){
+		command = ffmpeg();
+		
+		for(let file of record.files.audio){
+			command.input(record.pathAudio + file);
+			console.log(file);
+		}
+		
+		command.on('error', error => {
+				next(error);
+			}).on('end', () => {
+				record.files = null;
+				res.json({message: "Concat files end."});
+			}).mergeToFile(record.pathAudio + "concat.ogg", record.pathTemp);
+	}else{
+		next(new Error(`Now don´t have records.`));
+	}
 };
 
 
@@ -412,4 +458,4 @@ var inArray = function(array, string){
 	return null;
 };
 
-exports.record = record;
+module.exports = record;

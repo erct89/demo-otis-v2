@@ -91,11 +91,51 @@
 			<div flex-item="4" flex-container="column"> <!-- flex-item= "5" -->
 				<div class="card p++" id="">
 					<div class="card-main" flex-container="column">
+						<div flex-container="row" flex-column="12" class="p++">
+							<div flex-item="4" class="center">
+								<lx-button 
+										lx-type="fab" 
+										lx-size="s" 
+										lx-color="blue"
+										lx-tooltip="Video Send" 
+										lx-tooltip-position="bottom"
+										ng-click=""
+										ng-show="true"
+										class="btn-control"
+										ng-class="{
+											'inactive': ($ctrl.state !== 3), 
+											'inactive-back': ($ctrl.state !== 3)
+										}">
+										<!--mdi-camorder-off-->
+										<i class="mdi mdi-camcorder"></i>
+									</lx-button>
+							</div>
+							<div flex-item="4" class="center">
+								<lx-button 
+										lx-type="fab" 
+										lx-size="s" 
+										lx-color="blue"  
+										lx-tooltip="Audio Send" 
+										lx-tooltip-position="bottom"
+										ng-click=""
+										ng-show="true"
+										class="btn-control"
+										ng-class="{
+											'inactive': ($ctrl.state !== 3), 
+											'inactive-back': ($ctrl.state !== 3)
+										}">
+										<!-- mdi-microphone-off -->
+										<i class="mdi mdi-microphone"></i>
+									</lx-button>
+							</div>
+							<div flex-item="4" class="center"></div>
+						</div>
+					</div>
+					<div class="card-main" flex-container="column">
 						<div flex-container="column">
 							<div ng-class="{'inactive': ($ctrl.state !== 3)}">
 								<lx-text-field lx-label="Nombre de Usuario">
-									<input type="text"
-										ng-disabled="{{($ctrl.state !== 3)}}" 
+									<input type="text" 
 										ng-model="$ctrl.userName" 
 										lx-color="blue">
 								</lx-text-field>

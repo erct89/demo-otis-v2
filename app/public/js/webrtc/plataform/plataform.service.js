@@ -168,7 +168,7 @@ angular.module('webrtc')
 	        return os;
 		};
 
-		self.getMineType = function() {
+		self.getMimeType = function() {
 			var browser = self.getBrowser().name.toLowerCase(); 
 			return self.mimesType[browser];
 		};
@@ -178,6 +178,6 @@ angular.module('webrtc')
 			getBrowser: function() { return self.getBrowser(); },
 			getLanguages: function (){ return self.navigator.languages; },
 			getScreen: function(){ return self.getScreen(); },
-			getMineType: function(){ return self.getMineType();},
+			getMimeType: function(){ return self.getMimeType();},
 		};
 	}]);

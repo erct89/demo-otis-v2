@@ -16,7 +16,7 @@ angular.module('mediaRecord')
 				var type = self.type;
 				var constraints = {audio: false, video: false};
 				var states = ["unsupport","stopped","pause","recording"]; //Estados del Modulo.
-				var mimeTypes = Plataform.getMineType()[type]; //Obtener los tipos de archivos compatibles.			
+				var mimeTypes = Plataform.getMimeType()[type]; //Obtener los tipos de archivos compatibles.			
 				var recordObject = null; //Actual Objeto Grabado.
 
 				//Preconfiguracion sengun el atributo type de media-record.
@@ -116,6 +116,15 @@ angular.module('mediaRecord')
 
 				self.playList = function() {
 					if(self.type === 'audio'){
+						Records.playGroup(self.type).then(function(mediaStream){
+							console.log(mediaStream);
+							self.input = $sce.trustAsResourceUrl(Records.getBlobURL(mediaStream));
+						}).catch( function(error) {
+							console.log(error);
+						});
+						
+						/*
+						//Probar este codigo para cuando se envian los datos, a la pasarela.
 						for(var i = 0; i < self.recs.length; i++){
 							setTimeout(function(i) {
 								console.log(self.recs);
@@ -129,6 +138,7 @@ angular.module('mediaRecord')
 									});
 							}, 2000 * (i+1), i);
 						}
+						*/
 					}
 				};
 

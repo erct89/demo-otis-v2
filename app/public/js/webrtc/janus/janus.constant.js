@@ -1,7 +1,7 @@
 'use strict'; 
 
 angular.module('webrtc')
-	.constant('JANUS_SERVER', [ 
+	.constant('JANUS_SERVER', [
 		"https://webrtc.dev.ivrpowers.com:8089/janus", 
 		"wss://webrtc.dev.ivrpowers.com:8989"
 	]);
