@@ -18,10 +18,10 @@ pnacl/
 chromedriver
 minidump_stackwalk
 nacl_helper
-nacl_helper_bootstap
+nacl_helper_bootstrap
 nw
-nwjs
-playload
+nwjc
+payload
 
 #Librerias guardadas por bower
 app/public/libs/
