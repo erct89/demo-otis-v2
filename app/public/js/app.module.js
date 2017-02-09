@@ -9,5 +9,6 @@ angular.module('otisDemo', [
 	'gui',
 	'features',
 	'videoCall',
+	'videoCallRecord',
 	'mediaRecord',
 	'mirroring']);

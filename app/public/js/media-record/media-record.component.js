@@ -116,14 +116,17 @@ angular.module('mediaRecord')
 
 				self.playList = function() {
 					if(self.type === 'audio'){
+						//Usando la concatenacion de ficheros.
+						/*
 						Records.playGroup(self.type).then(function(mediaStream){
 							console.log(mediaStream);
 							self.input = $sce.trustAsResourceUrl(Records.getBlobURL(mediaStream));
 						}).catch( function(error) {
 							console.log(error);
 						});
-						
-						/*
+						*/
+
+					
 						//Probar este codigo para cuando se envian los datos, a la pasarela.
 						for(var i = 0; i < self.recs.length; i++){
 							setTimeout(function(i) {
@@ -138,7 +141,6 @@ angular.module('mediaRecord')
 									});
 							}, 2000 * (i+1), i);
 						}
-						*/
 					}
 				};
 

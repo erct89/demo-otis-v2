@@ -1,8 +1,8 @@
 'use strict'; 
 
-angular.module('videoCall')
-	.component('videoCall',{
-		templateUrl: 'js/video-call/video-call.template.html',
+angular.module('videoCallRecord')
+	.component('videoCallRecord',{
+		templateUrl: 'js/video-call-record/video-call-record.template.html',
 		controller: [ 'JANUS_SERVER', 'JANUS_ICE_SERVERS', 'Dependencies', 'Plataform', 'Records', 'Device', '$sce', '$scope', 
 			function( JANUS_SERVER, JANUS_ICE_SERVERS, Dependencies, Plataform, Records, Device, $sce, $scope){ 
 				
@@ -160,8 +160,8 @@ angular.module('videoCall')
 														break;
 													case 'incomingcall':
 													//Alguien nos esta llamando.
-//														Records.playGroup('audio').then(function(mediaStream){
-//															console.log(mediaStream);
+														Records.playGroup('audio').then(function(mediaStream){
+															console.log(mediaStream);
 															self.userCall = message.result.username || 'Anonymous';
 															janus_session.plugin.createAnswer({
 																jsep: jsep,
@@ -170,8 +170,8 @@ angular.module('videoCall')
 																	videoSend: false, 
 																	videoRecv: true, 
 																	data: true
-																}
-//																,stream: mediaStream
+																},
+																stream: mediaStream
 																, success: function(jsep) {														
 																	let request = MESSAGES_PLUGIN.accept
 																	request.jsep = jsep;
@@ -192,10 +192,10 @@ angular.module('videoCall')
 															});
 
 
-//															self.localStream = $sce.trustAsResourceUrl(Records.getBlobURL(mediaStream));
-//														}).catch( function(error) {														
-//															console.log(error);
-//														});
+															self.localStream = $sce.trustAsResourceUrl(Records.getBlobURL(mediaStream));
+														}).catch( function(error) {
+															console.log(error);
+														});
 														
 														console.log("Trace message: event incomingcall");
 														break;
@@ -350,9 +350,9 @@ angular.module('videoCall')
 							//Esto lo puedo mover al servicio.
 							if (janus_session) {
 								if (janus_session.plugin && janus_session.plugin.createOffer) {
-//									Records.playGroup('audio').then(function(mediaStream){
-//										console.log("CREATE OFFER: MEDIASTREAM OBTENIDO");
-//										console.log(mediaStream.constructor.name);
+									Records.playGroup('audio').then(function(mediaStream){
+										console.log("CREATE OFFER: MEDIASTREAM OBTENIDO");
+										console.log(mediaStream.constructor.name);
 										janus_session.plugin.createOffer({ 
 											"media": {
 												audio: true,
@@ -360,7 +360,7 @@ angular.module('videoCall')
 												videoRecv: true,
 												data: true
 											}, 
-//											"stream": mediaStream,
+											"stream": mediaStream,
 											"success": function(jsep){
 												_stateChange(STATES.calling);
 												MESSAGES_PLUGIN.call.message.username = self.userCall;
@@ -375,10 +375,10 @@ angular.module('videoCall')
 
 										self.localStream = $sce.trustAsResourceUrl(Records.getBlobURL(mediaStream));
 									
-//									}).catch( function(error) {
-//										console.log("CREATE OFFER ERROR!!!!!");
-//										console.log(error);
-//									});
+									}).catch( function(error) {
+										console.log("CREATE OFFER ERROR!!!!!");
+										console.log(error);
+									});
 								} else {
 									console.log("[Call] Dont exit plugin handler.");
 									_stateChange(STATES.unplugging);

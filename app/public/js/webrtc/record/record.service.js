@@ -443,16 +443,12 @@ angular.module('webrtc').service('Records',
 			name = ( typeof(name) === 'string' )? name: null;
 			
 			if(mimeType && ( id || name )){
-				console.log("Records.get");
-				console.log(id);
-				console.log(name);
-				console.log(mimeType);
 			//Existe mimeType y id:
 			// 1.- Creamos un objeto Record con mime and id;
 			// 2.- LLamamos a su metodo get(); 
 				result = new Record(id,name,null,{mimeType: mimeType});
 				return result.get();
-			}else if(mimeType.mime){
+			}else if(mimeType && mimeType.mime){
 			//Existe el objeto mimeType.
 			// 1.- Obtenemos el tipo de dato que es.
 			// 2.- Realizamos una peticion sobre record/type.
@@ -496,7 +492,6 @@ angular.module('webrtc').service('Records',
 					console.log(error);
 				});
 			});
-			
 		};
 
 

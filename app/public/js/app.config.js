@@ -5,8 +5,8 @@ angular.module('otisDemo')
 			template:'<features><h1>Hola<h1></features>'
 		}).when('/videocall',{
 			template: '<video-call></video-call>'
-		}).when('/mirroring',{
-			template: '<mirroring></mirroring>'
+		}).when('/videocallrecord',{
+			template: '<video-call-record></video-call-record>'
 		}).when('/video/record',{
 			template: '<media-record type="video"></media-record>'
 		}).when('/audio/record',{

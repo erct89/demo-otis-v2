@@ -14,9 +14,9 @@ angular.module('gui.menu').constant('MENU', {
 		url: 'videocall',
 		template :''
 	},{
-		id: 'mirroring',
-		name: 'Mirroring',
-		url: 'mirroring',
+		id: 'video-call-record',
+		name: 'Video Call Record',
+		url: 'videocallrecord',
 		template: ''
 	},{
 		id: 'video-record',
